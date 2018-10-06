@@ -1,1 +1,5 @@
-package agogos_host
+package main
+
+func main() {
+	println("Hello world!")
+}
