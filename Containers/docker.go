@@ -5,15 +5,38 @@ import (
 	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/pkg/errors"
+	"io"
+	"os"
 )
 
 type DockerRuntime struct{}
 
-func (DockerRuntime) CreateContainer(container *Container) error {
-	//TODO Implement
-	panic("implement me")
+func (DockerRuntime) CreateContainer(cont *Container) error {
+	cli := GetDockerClient()
+	ctx := context.Background()
+
+	reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+	io.Copy(os.Stdout, reader)
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: cont.Image,
+		Labels: cont.Labels,
+	}, nil, nil, cont.Name)
+	if err != nil {
+		return err
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (DockerRuntime) ReadContainer(id string) (*Container, error) {
