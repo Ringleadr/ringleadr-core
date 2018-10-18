@@ -21,7 +21,7 @@ func CreateApplication(ctx *gin.Context) {
 
 	//Start all components
 	for _, comp := range app.Components {
-		go Components.StartComponent(comp)
+		go Components.StartComponent(comp, app.Name)
 	}
 
 	ctx.JSON(http.StatusOK, nil)
