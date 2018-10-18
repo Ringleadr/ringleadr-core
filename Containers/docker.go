@@ -25,7 +25,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	io.Copy(os.Stdout, reader)
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: cont.Image,
+		Image:  cont.Image,
 		Labels: cont.Labels,
 	}, nil, nil, cont.Name)
 	if err != nil {
@@ -52,7 +52,10 @@ func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
 
 	//Only list the containers we are managing
 	filter.Add("label", "agogos.managed")
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{Filters:filter})
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
+		Filters: filter,
+		All: true,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +75,8 @@ func (DockerRuntime) DeleteContainer(id string) error {
 
 func dockerContainersToInterface(containers ...types.Container) ([]*Container, error) {
 	var returnContainers []*Container
-	for _, container := range containers {
-		newCont, err := dockerContainerToInterface(container)
+	for _, cont := range containers {
+		newCont, err := dockerContainerToInterface(cont)
 		if err != nil {
 			return nil, err
 		}
@@ -82,15 +85,16 @@ func dockerContainersToInterface(containers ...types.Container) ([]*Container, e
 	return returnContainers, nil
 }
 
-func dockerContainerToInterface(container types.Container) (*Container, error) {
-	if len(container.Names) < 0 {
-		return nil, errors.New(fmt.Sprintf("Container %s has no name", container.ID))
+func dockerContainerToInterface(dockerCont types.Container) (*Container, error) {
+	if len(dockerCont.Names) < 0 {
+		return nil, errors.New(fmt.Sprintf("Container %s has no name", dockerCont.ID))
 	}
 	cont := &Container{
-		ID:     container.ID,
-		Image:  container.Image,
-		Name:   container.Names[0],
-		Labels: container.Labels,
+		ID:     dockerCont.ID,
+		Image:  dockerCont.Image,
+		Name:   dockerCont.Names[0],
+		Labels: dockerCont.Labels,
+		Status: fmt.Sprintf("%s: %s", dockerCont.State, dockerCont.Status),
 	}
 	return cont, nil
 }

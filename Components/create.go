@@ -7,7 +7,7 @@ import (
 
 func StartComponent(comp *Datatypes.Component) error {
 	cont := &Containers.Container{
-		Name: comp.Name,
+		Name:  comp.Name,
 		Image: comp.Image,
 		Labels: map[string]string{
 			"agogos.managed": "",

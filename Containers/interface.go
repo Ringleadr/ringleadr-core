@@ -7,6 +7,7 @@ type Container struct {
 	Image  string            `json:"image"`
 	Name   string            `json:"name"`
 	Labels map[string]string `json:"labels"`
+	Status string            `json:"status"`
 }
 
 //TODO Add ports to Interface

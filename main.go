@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var getMethods = map[string]func(ctx *gin.Context) {
+var getMethods = map[string]func(ctx *gin.Context){
 	"/ping": func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
 			"message": "pong",
@@ -15,7 +15,7 @@ var getMethods = map[string]func(ctx *gin.Context) {
 	"/applications": Applications.GetApplications,
 }
 
-var postMethods = map[string]func(ctx *gin.Context) {
+var postMethods = map[string]func(ctx *gin.Context){
 	"/applications": Applications.CreateApplication,
 }
 
