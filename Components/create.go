@@ -10,7 +10,7 @@ func StartComponent(comp *Datatypes.Component, appName string) error {
 		Name:  comp.Name,
 		Image: comp.Image,
 		Labels: map[string]string{
-			"agogos.managed": "",
+			"agogos.managed":  "",
 			"agogos.owned.by": appName,
 		},
 	}

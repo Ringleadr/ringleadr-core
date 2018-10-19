@@ -54,7 +54,7 @@ func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
 	filter.Add("label", "agogos.managed")
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		Filters: filter,
-		All: true,
+		All:     true,
 	})
 	if err != nil {
 		return nil, err
