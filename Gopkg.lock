@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:7168126e41d7c8517d5f4ad2e2d19a050e936eed2f019f1132be022500613ff3"
+  name = "github.com/GodlikePenguin/agogos-datatypes"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5bf2eb9f173a25296d1685a199544a859889736d"
+
+[[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
@@ -194,6 +202,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/GodlikePenguin/agogos-datatypes",
     "github.com/davecgh/go-spew/spew",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",

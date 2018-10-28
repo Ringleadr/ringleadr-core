@@ -1,9 +1,9 @@
 package Applications
 
 import (
+	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
-	"github.com/GodlikePenguin/agogos-host/Datatypes"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"net/http"

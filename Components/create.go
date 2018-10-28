@@ -1,8 +1,8 @@
 package Components
 
 import (
+	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Containers"
-	"github.com/GodlikePenguin/agogos-host/Datatypes"
 )
 
 func StartComponent(comp *Datatypes.Component, appName string) error {

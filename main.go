@@ -31,7 +31,7 @@ func main() {
 	//TODO Take from environment
 	runtime := Containers.DockerRuntime{}
 	Containers.SetupConfig(runtime)
-	r.Run()
+	r.Run(":14440")
 }
 
 func setupRouter() *gin.Engine {
