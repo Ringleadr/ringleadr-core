@@ -14,6 +14,7 @@ func SetupConfig(runtime ContainerRuntime) {
 	}
 	dockerClient = cli
 	containerRuntime = runtime
+	containerRuntime.AssertOnline()
 }
 
 func GetDockerClient() *client.Client {

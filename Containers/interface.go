@@ -8,11 +8,14 @@ type Container struct {
 	Name   string            `json:"name"`
 	Labels map[string]string `json:"labels"`
 	Status string            `json:"status"`
+	Env    []string          `json:"env"`
+	Ports  map[string]string `json:"ports"`
 }
 
 //TODO Add ports to Interface
 
 type ContainerRuntime interface {
+	AssertOnline() error
 	CreateContainer(container *Container) error
 	ReadContainer(id string) (*Container, error)
 	ReadAllContainers() ([]*Container, error)

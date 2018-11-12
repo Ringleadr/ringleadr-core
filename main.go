@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/GodlikePenguin/agogos-host/Applications"
 	"github.com/GodlikePenguin/agogos-host/Containers"
+	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +21,11 @@ var postMethods = map[string]func(ctx *gin.Context){
 }
 
 func main() {
+	//TODO Take from environment
+	runtime := Containers.DockerRuntime{}
+	Containers.SetupConfig(runtime)
+
+	Datastore.SetupDatastore()
 	r := setupRouter()
 	for path, handler := range getMethods {
 		r.GET(path, handler)
@@ -28,9 +34,6 @@ func main() {
 		r.POST(path, handler)
 	}
 
-	//TODO Take from environment
-	runtime := Containers.DockerRuntime{}
-	Containers.SetupConfig(runtime)
 	r.Run(":14440")
 }
 

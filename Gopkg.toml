@@ -40,3 +40,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/GodlikePenguin/agogos-datatypes"
+
+[[constraint]]
+  name = "github.com/mongodb/mongo-go-driver"
+  version = "0.0.17"

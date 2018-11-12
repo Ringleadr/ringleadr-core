@@ -7,12 +7,25 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"io"
 	"os"
 )
 
 type DockerRuntime struct{}
+
+func (DockerRuntime) AssertOnline() error {
+	cli := GetDockerClient()
+	ctx := context.Background()
+
+	_, err := cli.ServerVersion(ctx)
+	if err != nil {
+		panic("Agogos requires Docker to be running to start")
+	}
+
+	return nil
+}
 
 func (DockerRuntime) CreateContainer(cont *Container) error {
 	cli := GetDockerClient()
@@ -24,10 +37,24 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	}
 	io.Copy(os.Stdout, reader)
 
+	ports := nat.PortSet{}
+	portBind := nat.PortMap{}
+	for k, v := range cont.Ports {
+		p, err := nat.NewPort("tcp", v)
+		if err != nil {
+			return err
+		}
+		ports[p] = struct{}{}
+		portBind[p] = []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: k}}
+	}
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:  cont.Image,
-		Labels: cont.Labels,
-	}, nil, nil, cont.Name)
+		Image:        cont.Image,
+		Labels:       cont.Labels,
+		Env:          cont.Env,
+		ExposedPorts: ports,
+	}, &container.HostConfig{
+		PortBindings: portBind,
+	}, nil, cont.Name)
 	if err != nil {
 		return err
 	}
@@ -40,12 +67,28 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 }
 
 func (DockerRuntime) ReadContainer(id string) (*Container, error) {
-	//TODO Implement
-	panic("implement me")
+	//TODO deal with id or name
+	cli := GetDockerClient()
+	ctx := context.Background()
+
+	filter := filters.NewArgs()
+	filter.Add("name", id)
+	cont, err := cli.ContainerList(ctx, types.ContainerListOptions{
+		Filters: filter,
+		All:     true,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cont) != 1 {
+		return nil, errors.New("did not return single container")
+	}
+	return dockerContainerToInterface(cont[0])
 }
 
 func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
-	//TODO Implement
 	cli := GetDockerClient()
 
 	filter := filters.NewArgs()
@@ -89,6 +132,7 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 	if len(dockerCont.Names) < 0 {
 		return nil, errors.New(fmt.Sprintf("Container %s has no name", dockerCont.ID))
 	}
+	//TODO try to get env here
 	cont := &Container{
 		ID:     dockerCont.ID,
 		Image:  dockerCont.Image,
