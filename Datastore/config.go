@@ -1,16 +1,17 @@
 package Datastore
 
 import (
-	"context"
 	"github.com/GodlikePenguin/agogos-host/Containers"
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/globalsign/mgo"
 	"log"
 	"strings"
 	"time"
 )
 
 var (
-	mongoClient *mongo.Client
+	mongoClient           *mgo.Session
+	agogosDB              *mgo.Database
+	applicationCollection *mgo.Collection
 )
 
 func SetupDatastore() {
@@ -18,43 +19,71 @@ func SetupDatastore() {
 	//Let's create a Datastore container
 	runtime := Containers.GetContainerRuntime()
 
-	//Check there isn't an existing datastore
+	//Only create the container if one doesn't exist
 	cont, err := runtime.ReadContainer("agogos-mongo-primary")
-	if err == nil && strings.Contains(cont.Status, "running") {
-		//already have a container, don't mess with it
-		return
+	if !(err == nil && strings.Contains(cont.Status, "running")) {
+
+		log.Println("Creating new datastore. This may take some time.")
+
+		//Create a new data store
+		config := &Containers.Container{
+			Name:  "agogos-mongo-primary",
+			Image: "bitnami/mongodb:3.6.8",
+			Labels: map[string]string{
+				"agogos-mongo": "primary",
+			},
+			Env: []string{
+				"MONGODB_REPLICA_SET_MODE=primary",
+			},
+			Ports: map[string]string{
+				"27017": "27017",
+			},
+		}
+
+		if err := runtime.CreateContainer(config); err != nil {
+			panic("Could not start backing Datastore")
+		}
+
+		//Sleep to give time for db to start
+		//TODO do this is a more programatic way
+		time.Sleep(1 * time.Minute)
+	} else {
+		log.Println("Using existing database")
 	}
 
-	//Create a new data store
-	config := &Containers.Container{
-		Name:  "agogos-mongo-primary",
-		Image: "bitnami/mongodb:3.6.8",
-		Labels: map[string]string{
-			"agogos-mongo": "primary",
-		},
-		Env: []string{
-			"MONGODB_REPLICA_SET_MODE=primary",
-		},
-		Ports: map[string]string{
-			"27017": "27017",
-		},
-	}
-
-	if err := runtime.CreateContainer(config); err != nil {
-		panic("Could not start backing Datastore")
-	}
-
-	go setupTables()
+	getClient()
+	setupTables()
+	startWatchers()
 }
 
-func setupTables() {
+func getClient() {
 	//Wait until the service is ready
 	waitUntilReady()
 	//setup the client
 	mongoClient = setupClient()
+}
+
+func setupTables() {
 	//create the db and the collection
-	db := mongoClient.Database("agogos")
-	_ = db.Collection("applications")
+	db := mongoClient.DB("agogos")
+	agogosDB = db
+
+	//Hacky insert to ensure the DB exists for the watcher
+	dummy := map[string]string{
+		"foo": "bah",
+	}
+	err := db.C("foo").Insert(dummy)
+	if err != nil {
+		panic(err)
+	}
+
+	coll := db.C("applications")
+	applicationCollection = coll
+}
+
+func startWatchers() {
+	go watchApplications(applicationCollection)
+	//TODO start network watcher
 }
 
 func waitUntilReady() {
@@ -69,15 +98,10 @@ func waitUntilReady() {
 	}
 }
 
-func setupClient() *mongo.Client {
-	client, err := mongo.NewClient("mongodb://localhost:27017")
+func setupClient() *mgo.Session {
+	session, err := mgo.Dial("mongodb://localhost:27017")
 	if err != nil {
-		log.Fatal(err)
-
+		panic(err)
 	}
-	err = client.Connect(context.TODO())
-	if err != nil {
-		log.Fatal(err)
-	}
-	return client
+	return session
 }

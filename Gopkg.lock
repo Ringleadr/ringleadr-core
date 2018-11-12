@@ -103,6 +103,20 @@
   version = "v1.3.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:78102ee4d536347316bc42e818340cc50902e45dbd7fdd524c5a1fc0cb07b588"
+  name = "github.com/globalsign/mgo"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram",
+  ]
+  pruneopts = "UT"
+  revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
+
+[[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
   name = "github.com/go-stack/stack"
   packages = ["."]
@@ -334,7 +348,10 @@
     "github.com/docker/docker/api/types/container",
     "github.com/docker/docker/api/types/filters",
     "github.com/docker/docker/client",
+    "github.com/docker/go-connections/nat",
     "github.com/gin-gonic/gin",
+    "github.com/globalsign/mgo",
+    "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/mongo",
     "github.com/pkg/errors",
   ]
