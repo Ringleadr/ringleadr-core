@@ -117,28 +117,12 @@
   revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
 
 [[projects]]
-  digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
-  name = "github.com/go-stack/stack"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a"
-  version = "v1.8.0"
-
-[[projects]]
   digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   pruneopts = "UT"
   revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
   version = "v1.2.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:4a0c6bb4805508a6287675fac876be2ac1182539ca8a32468d8128882e9d5009"
-  name = "github.com/golang/snappy"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
   digest = "1:3e551bbb3a7c0ab2a2bf4660e7fcad16db089fdcfbb44b0199e62838038623ea"
@@ -173,69 +157,6 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:e3492bfc9acbe6e04b51fe36220f9aea8c919885632f0de55685db80c0029844"
-  name = "github.com/mongodb/mongo-go-driver"
-  packages = [
-    "bson",
-    "bson/bsoncodec",
-    "bson/bsoncore",
-    "bson/bsonrw",
-    "bson/bsontype",
-    "bson/decimal",
-    "bson/elements",
-    "bson/objectid",
-    "bson/parser",
-    "bson/parser/ast",
-    "core/address",
-    "core/auth",
-    "core/auth/internal/gssapi",
-    "core/command",
-    "core/compressor",
-    "core/connection",
-    "core/connstring",
-    "core/description",
-    "core/dispatch",
-    "core/event",
-    "core/option",
-    "core/readconcern",
-    "core/readpref",
-    "core/result",
-    "core/session",
-    "core/tag",
-    "core/topology",
-    "core/uuid",
-    "core/version",
-    "core/wiremessage",
-    "core/writeconcern",
-    "internal",
-    "mongo",
-    "mongo/aggregateopt",
-    "mongo/bulkwriteopt",
-    "mongo/changestreamopt",
-    "mongo/clientopt",
-    "mongo/collectionopt",
-    "mongo/countopt",
-    "mongo/dbopt",
-    "mongo/deleteopt",
-    "mongo/distinctopt",
-    "mongo/dropcollopt",
-    "mongo/findopt",
-    "mongo/indexopt",
-    "mongo/insertopt",
-    "mongo/listcollectionopt",
-    "mongo/listdbopt",
-    "mongo/mongoopt",
-    "mongo/replaceopt",
-    "mongo/runcmdopt",
-    "mongo/sessionopt",
-    "mongo/transactionopt",
-    "mongo/updateopt",
-  ]
-  pruneopts = "UT"
-  revision = "8db96a607cde2fea156d9a72c26aa09271592591"
-  version = "v0.0.17"
-
-[[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
@@ -253,30 +174,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:40fdfd6ab85ca32b6935853bbba35935dcb1d796c8135efd85947566c76e662e"
-  name = "github.com/xdg/scram"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "7eeb5667e42c09cb51bf7b7c28aea8c56767da90"
-
-[[projects]]
-  digest = "1:577b99fc55ee19cbf1ffd072808c91ced78cd732bd9d0517bec9b90e532069cb"
-  name = "github.com/xdg/stringprep"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "bd625b8dc1e3b0f57412280ccbcc317f0c69d8db"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:f92f6956e4059f6a3efc14924d2dd58ba90da25cc57fe07ae3779ef2f5e0c5f2"
-  name = "golang.org/x/crypto"
-  packages = ["pbkdf2"]
-  pruneopts = "UT"
-  revision = "e4dc69e5b2fd71dcaf8bd5d054eb936deb78d1fa"
-
-[[projects]]
-  branch = "master"
   digest = "1:d9f9f45d3383b93ce1c7e744b3ede6974917ae4d100e1a7abfc2906e5e5e2e28"
   name = "golang.org/x/net"
   packages = [
@@ -290,14 +187,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5e4d81c50cffcb124b899e4f3eabec3930c73532f0096c27f94476728ba03028"
-  name = "golang.org/x/sync"
-  packages = ["semaphore"]
-  pruneopts = "UT"
-  revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
-
-[[projects]]
-  branch = "master"
   digest = "1:f5aa274a0377f85735edc7fedfb0811d3cbc20af91633797cb359e29c3272271"
   name = "golang.org/x/sys"
   packages = [
@@ -306,21 +195,6 @@
   ]
   pruneopts = "UT"
   revision = "fa43e7bc11baaae89f3f902b2b4d832b68234844"
-
-[[projects]]
-  digest = "1:8029e9743749d4be5bc9f7d42ea1659471767860f0cdc34d37c3111bd308a295"
-  name = "golang.org/x/text"
-  packages = [
-    "internal/gen",
-    "internal/triegen",
-    "internal/ucd",
-    "transform",
-    "unicode/cldr",
-    "unicode/norm",
-  ]
-  pruneopts = "UT"
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"
@@ -351,8 +225,7 @@
     "github.com/docker/go-connections/nat",
     "github.com/gin-gonic/gin",
     "github.com/globalsign/mgo",
-    "github.com/mongodb/mongo-go-driver/bson",
-    "github.com/mongodb/mongo-go-driver/mongo",
+    "github.com/globalsign/mgo/bson",
     "github.com/pkg/errors",
   ]
   solver-name = "gps-cdcl"
