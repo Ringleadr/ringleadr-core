@@ -20,6 +20,10 @@ var postMethods = map[string]func(ctx *gin.Context){
 	"/applications": Applications.CreateApplication,
 }
 
+var deleteMethods = map[string]func(ctx *gin.Context){
+	"/applications/:name": Applications.DeleteApplication,
+}
+
 func main() {
 	//TODO Take from environment
 	runtime := Containers.DockerRuntime{}
@@ -32,6 +36,9 @@ func main() {
 	}
 	for path, handler := range postMethods {
 		r.POST(path, handler)
+	}
+	for path, handler := range deleteMethods {
+		r.DELETE(path, handler)
 	}
 
 	r.Run(":14440")

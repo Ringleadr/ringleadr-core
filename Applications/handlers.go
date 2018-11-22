@@ -2,6 +2,7 @@ package Applications
 
 import (
 	"github.com/GodlikePenguin/agogos-datatypes"
+	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -16,6 +17,7 @@ func CreateApplication(ctx *gin.Context) {
 	err := Datastore.InsertApp(app)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, nil)
@@ -25,6 +27,7 @@ func GetApplications(ctx *gin.Context) {
 	apps, err := Datastore.GetAllApps()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	ctx.JSON(http.StatusOK, apps)
@@ -38,6 +41,14 @@ func UpdateApplication() {
 	//Update a specific application
 }
 
-func DeleteApplication() {
-	//Delete an application
+func DeleteApplication(ctx *gin.Context) {
+	name := ctx.Param("name")
+	err := Datastore.DeleteApp(name)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
+	go Components.DeleteAllComponents(name)
+	ctx.JSON(http.StatusOK, nil)
 }

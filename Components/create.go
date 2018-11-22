@@ -6,6 +6,7 @@ import (
 )
 
 func StartComponent(comp *Datatypes.Component, appName string) error {
+	//TODO name should include the name of the app to avoid collisions
 	cont := &Containers.Container{
 		Name:  comp.Name,
 		Image: comp.Image,

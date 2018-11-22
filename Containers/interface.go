@@ -19,6 +19,8 @@ type ContainerRuntime interface {
 	CreateContainer(container *Container) error
 	ReadContainer(id string) (*Container, error)
 	ReadAllContainers() ([]*Container, error)
+	ReadAllContainersWithFilter(filter map[string]map[string]bool) ([]*Container, error)
 	UpdateContainer(container *Container) error
 	DeleteContainer(id string) error
+	DeleteContainerWithFilter(filter map[string]map[string]bool) error
 }

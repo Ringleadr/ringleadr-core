@@ -4,12 +4,14 @@ package Containers
 import (
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"io"
+	"log"
 	"os"
 )
 
@@ -33,6 +35,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 
 	reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
 	if err != nil {
+		log.Println("Error pulling image: ", err.Error())
 		return err
 	}
 	io.Copy(os.Stdout, reader)
@@ -56,10 +59,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		PortBindings: portBind,
 	}, nil, cont.Name)
 	if err != nil {
+		log.Println("Error Creating container: ", err.Error())
 		return err
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		log.Println("Error starting container: ", err.Error())
 		return err
 	}
 
@@ -79,6 +84,7 @@ func (DockerRuntime) ReadContainer(id string) (*Container, error) {
 	})
 
 	if err != nil {
+		log.Println("Error listing containers: ", err.Error())
 		return nil, err
 	}
 
@@ -100,9 +106,33 @@ func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
 		All:     true,
 	})
 	if err != nil {
+		log.Println("Error listing containers: ", err.Error())
 		return nil, err
 	}
 
+	return dockerContainersToInterface(containers...)
+}
+
+func (DockerRuntime) ReadAllContainersWithFilter(filter map[string]map[string]bool) ([]*Container, error) {
+	cli := GetDockerClient()
+
+	dockerFilter := filters.NewArgs()
+	dockerFilter.Add("label", "agogos.managed")
+	for k, v := range filter {
+		for innerk := range v {
+			dockerFilter.Add(k, innerk)
+		}
+	}
+
+	spew.Dump(dockerFilter)
+
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
+		Filters: dockerFilter,
+	})
+	if err != nil {
+		log.Println("Error listing containers: ", err.Error())
+		return nil, err
+	}
 	return dockerContainersToInterface(containers...)
 }
 
@@ -114,6 +144,27 @@ func (DockerRuntime) UpdateContainer(container *Container) error {
 func (DockerRuntime) DeleteContainer(id string) error {
 	//TODO Implement
 	panic("implement me")
+}
+
+func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bool) error {
+	cli := GetDockerClient()
+
+	containers, err := d.ReadAllContainersWithFilter(filter)
+	if err != nil {
+		return err
+	}
+
+	for _, cont := range containers {
+		err = cli.ContainerRemove(context.Background(), cont.ID, types.ContainerRemoveOptions{
+			RemoveVolumes: true,
+			Force:         true,
+		})
+		if err != nil {
+			log.Println("Error deleting container", err.Error())
+			return err
+		}
+	}
+	return nil
 }
 
 func dockerContainersToInterface(containers ...types.Container) ([]*Container, error) {

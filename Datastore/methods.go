@@ -32,3 +32,12 @@ func GetAllApps() ([]Datatypes.Application, error) {
 	}
 	return apps, nil
 }
+
+func DeleteApp(name string) error {
+	//TODO check if app exists before deleting (otherwise this returns a blank error)
+	err := applicationCollection.Remove(bson.M{"name": name})
+	if err != nil {
+		return err
+	}
+	return nil
+}

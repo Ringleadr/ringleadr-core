@@ -28,9 +28,10 @@ func watchApplications(coll *mgo.Collection) {
 				unMarshalIntoApp(changeDoc, &app)
 				createComponentsFor(&app)
 			} else if changeDoc["operationType"] == "delete" {
-				//TODO
-				//etc
+				//On a delete event, we can't get the full data or even just the name from mongo, so here we
+				// don't use a changestream, and rely on the handler calling the DeleteAllComponentsForApp method
 			}
+			//TODO rest
 			spew.Dump(changeDoc)
 		}
 	}
