@@ -15,13 +15,7 @@ script:
   - env GOOS=darwin GOARCH=amd64 go build -o build/agogos-host-darwin
 
 deploy:
-  provider: releases
-  tag_name: "v0.1.0"
-  repo: GodlikePenguin/agogos-host-release
-  api_key: $GITHUB_API_TOKEN
-  file:
-  - build/agogos-host-linux
-  - build/agogos-host-darwin
-  skip_cleanup: true
+  provider: script
+  script: bash deploy.sh
   on:
-    tags: false
+    branch: master
