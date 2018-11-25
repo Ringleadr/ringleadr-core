@@ -16,6 +16,7 @@ script:
 
 deploy:
   provider: releases
+  tag_name: "v0.1.0"
   repo: GodlikePenguin/agogos-host-release
   api_key: $GITHUB_API_TOKEN
   file:
