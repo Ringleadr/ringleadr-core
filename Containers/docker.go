@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"io"
@@ -160,6 +161,28 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 			log.Println("Error deleting container", err.Error())
 			return err
 		}
+	}
+	return nil
+}
+
+func (DockerRuntime) CreateStorage(name string) error {
+	cli := GetDockerClient()
+
+	_, err := cli.VolumeCreate(context.Background(), volume.VolumesCreateBody{Name: name})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (DockerRuntime) DeleteStorage(name string) error {
+	cli := GetDockerClient()
+
+	err := cli.VolumeRemove(context.Background(), name, false)
+	if err != nil {
+		log.Println(err)
+		return err
 	}
 	return nil
 }

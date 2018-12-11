@@ -4,6 +4,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Applications"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/GodlikePenguin/agogos-host/Storage"
 	"github.com/gin-gonic/gin"
 	"log"
 )
@@ -16,14 +17,17 @@ var getMethods = map[string]func(ctx *gin.Context){
 	},
 	"/applications":      Applications.GetApplications,
 	"/application/:name": Applications.GetApplication,
+	"/storage":           Storage.ListStorage,
 }
 
 var postMethods = map[string]func(ctx *gin.Context){
-	"/applications": Applications.CreateApplication,
+	"/applications":  Applications.CreateApplication,
+	"/storage/:name": Storage.CreateStorage,
 }
 
 var deleteMethods = map[string]func(ctx *gin.Context){
 	"/applications/:name": Applications.DeleteApplication,
+	"/storage/:name":      Storage.DeleteStorage,
 }
 
 func main() {

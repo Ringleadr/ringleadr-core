@@ -44,3 +44,29 @@ func DeleteApp(name string) error {
 	}
 	return nil
 }
+
+func InsertStorage(storage *Datatypes.Storage) error {
+	err := storageCollection.Insert(storage)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteStorage(name string) error {
+	//TODO returns empty error when it can't delete the required item
+	err := storageCollection.Remove(bson.M{"name": name})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAllStorage() ([]Datatypes.Storage, error) {
+	var storage []Datatypes.Storage
+	err := storageCollection.Find(bson.M{}).All(&storage)
+	if err != nil {
+		return nil, err
+	}
+	return storage, nil
+}

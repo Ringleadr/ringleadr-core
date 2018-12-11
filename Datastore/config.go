@@ -12,6 +12,7 @@ var (
 	mongoClient           *mgo.Session
 	agogosDB              *mgo.Database
 	applicationCollection *mgo.Collection
+	storageCollection     *mgo.Collection
 )
 
 func SetupDatastore() {
@@ -79,10 +80,13 @@ func setupTables() {
 
 	coll := db.C("applications")
 	applicationCollection = coll
+	storage := db.C("storage")
+	storageCollection = storage
 }
 
 func startWatchers() {
 	go watchApplications(applicationCollection)
+	go watchStorage(storageCollection)
 	//TODO start network watcher
 }
 
