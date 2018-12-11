@@ -1,6 +1,7 @@
 package Containers
 
 import (
+	"fmt"
 	"github.com/docker/docker/client"
 )
 
@@ -14,7 +15,10 @@ func SetupConfig(runtime ContainerRuntime) {
 	}
 	dockerClient = cli
 	containerRuntime = runtime
-	containerRuntime.AssertOnline()
+	err = containerRuntime.AssertOnline()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func GetDockerClient() *client.Client {
@@ -23,4 +27,8 @@ func GetDockerClient() *client.Client {
 
 func GetContainerRuntime() ContainerRuntime {
 	return containerRuntime
+}
+
+func GetContainerNameForComponent(componentName string, appName string, replicaNo int) string {
+	return fmt.Sprintf("agogos-%s-%s-%d", appName, componentName, replicaNo)
 }

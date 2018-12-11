@@ -5,6 +5,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/gin-gonic/gin"
+	"log"
 )
 
 var getMethods = map[string]func(ctx *gin.Context){
@@ -13,7 +14,8 @@ var getMethods = map[string]func(ctx *gin.Context){
 			"message": "pong",
 		})
 	},
-	"/applications": Applications.GetApplications,
+	"/applications":      Applications.GetApplications,
+	"/application/:name": Applications.GetApplication,
 }
 
 var postMethods = map[string]func(ctx *gin.Context){
@@ -41,7 +43,7 @@ func main() {
 		r.DELETE(path, handler)
 	}
 
-	r.Run(":14440")
+	log.Fatal(r.Run(":14440"))
 }
 
 func setupRouter() *gin.Engine {

@@ -38,7 +38,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		log.Println("Error pulling image: ", err.Error())
 		return err
 	}
-	io.Copy(os.Stdout, reader)
+	_, _ = io.Copy(os.Stdout, reader)
 
 	ports := nat.PortSet{}
 	portBind := nat.PortMap{}

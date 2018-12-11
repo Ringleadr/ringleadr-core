@@ -19,6 +19,9 @@ func GetApp(name string) (*Datatypes.Application, error) {
 	app := &Datatypes.Application{}
 	err := applicationCollection.Find(bson.M{"name": name}).One(app)
 	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
 		return &Datatypes.Application{}, err
 	}
 	return app, nil

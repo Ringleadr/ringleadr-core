@@ -43,7 +43,10 @@ func unMarshalIntoApp(m bson.M, app *Datatypes.Application) {
 		log.Println(err)
 		return
 	}
-	bson.Unmarshal(bsonBytes, &app)
+	err = bson.Unmarshal(bsonBytes, &app)
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func createComponentsFor(app *Datatypes.Application) {
