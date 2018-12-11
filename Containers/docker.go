@@ -4,7 +4,6 @@ package Containers
 import (
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -123,8 +122,6 @@ func (DockerRuntime) ReadAllContainersWithFilter(filter map[string]map[string]bo
 			dockerFilter.Add(k, innerk)
 		}
 	}
-
-	spew.Dump(dockerFilter)
 
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		Filters: dockerFilter,

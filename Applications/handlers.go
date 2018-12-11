@@ -18,6 +18,12 @@ func CreateApplication(ctx *gin.Context) {
 		return
 	}
 
+	for _, comp := range app.Components {
+		if comp.Replicas < 1 {
+			comp.Replicas = 1
+		}
+	}
+
 	appExists, _ := getAppFromName(app.Name)
 	if appExists != nil {
 		ctx.JSON(http.StatusInternalServerError, "an app already exists with that name")

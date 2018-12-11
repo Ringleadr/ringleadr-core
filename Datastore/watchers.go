@@ -3,7 +3,6 @@ package Datastore
 import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"log"
@@ -32,7 +31,7 @@ func watchApplications(coll *mgo.Collection) {
 				// don't use a changestream, and rely on the handler calling the DeleteAllComponentsForApp method
 			}
 			//TODO rest
-			spew.Dump(changeDoc)
+			//spew.Dump(changeDoc)
 		}
 	}
 }
