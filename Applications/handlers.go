@@ -4,6 +4,7 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,6 +15,8 @@ func CreateApplication(ctx *gin.Context) {
 	app := &Datatypes.Application{}
 	err := ctx.BindJSON(app)
 	if err != nil {
+		println("bind error")
+		spew.Dump(err)
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}

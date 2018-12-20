@@ -70,3 +70,15 @@ func GetAllStorage() ([]Datatypes.Storage, error) {
 	}
 	return storage, nil
 }
+
+func GetStorage(name string) (*Datatypes.Storage, error) {
+	storage := &Datatypes.Storage{}
+	err := storageCollection.Find(bson.M{"name": name}).One(storage)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return storage, err
+}

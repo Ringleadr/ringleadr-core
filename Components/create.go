@@ -18,6 +18,10 @@ func StartComponent(comp *Datatypes.Component, appName string) error {
 	}
 
 	runtime := Containers.GetContainerRuntime()
+	var storeage []Containers.StorageMount
+	for _, s := range comp.Storage {
+		storeage = append(storeage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
+	}
 	for i := 0; i < comp.Replicas; i++ {
 		cont := &Containers.Container{
 			Name:  Containers.GetContainerNameForComponent(comp.Name, appName, i),
@@ -27,6 +31,7 @@ func StartComponent(comp *Datatypes.Component, appName string) error {
 				"agogos.owned.by": appName,
 				fmt.Sprintf("agogos.%s.%s.replica", appName, comp.Name): strconv.Itoa(i),
 			},
+			Storage: storeage,
 		}
 		err := runtime.CreateContainer(cont)
 		if err != nil {

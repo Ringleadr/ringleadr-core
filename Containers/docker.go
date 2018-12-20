@@ -7,12 +7,11 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
-	"io"
 	"log"
-	"os"
 )
 
 type DockerRuntime struct{}
@@ -33,12 +32,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	cli := GetDockerClient()
 	ctx := context.Background()
 
-	reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
-	if err != nil {
-		log.Println("Error pulling image: ", err.Error())
-		return err
-	}
-	_, _ = io.Copy(os.Stdout, reader)
+	//reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
+	//if err != nil {
+	//	log.Println("Error pulling image: ", err.Error())
+	//	return err
+	//}
+	//_, _ = io.Copy(os.Stdout, reader)
 
 	ports := nat.PortSet{}
 	portBind := nat.PortMap{}
@@ -50,6 +49,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		ports[p] = struct{}{}
 		portBind[p] = []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: k}}
 	}
+
+	mounts := []mount.Mount{}
+	for _, store := range cont.Storage {
+		mounts = append(mounts, mount.Mount{Type: mount.TypeVolume, Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
+	}
+
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        cont.Image,
 		Labels:       cont.Labels,
@@ -57,6 +62,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		ExposedPorts: ports,
 	}, &container.HostConfig{
 		PortBindings: portBind,
+		Mounts:       mounts,
 	}, nil, cont.Name)
 	if err != nil {
 		log.Println("Error Creating container: ", err.Error())

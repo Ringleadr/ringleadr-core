@@ -1,6 +1,7 @@
 package Datastore
 
 import (
+	"fmt"
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
@@ -88,13 +89,13 @@ func unMarshalIntoApp(m bson.M, app *Datatypes.Application) {
 	}
 }
 
-func unMarshalIntoStorage(m bson.M, app *Datatypes.Storage) {
+func unMarshalIntoStorage(m bson.M, store *Datatypes.Storage) {
 	bsonBytes, err := bson.Marshal(m["fullDocument"])
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	err = bson.Unmarshal(bsonBytes, &app)
+	err = bson.Unmarshal(bsonBytes, &store)
 	if err != nil {
 		log.Print(err)
 	}
@@ -102,6 +103,14 @@ func unMarshalIntoStorage(m bson.M, app *Datatypes.Storage) {
 
 func createComponentsFor(app *Datatypes.Application) {
 	for _, comp := range app.Components {
+		for _, store := range comp.Storage {
+			if s, err := GetStorage(fmt.Sprintf("agogos-%s", store.Name)); s == nil && err == nil {
+				err := InsertStorage(&Datatypes.Storage{Name: fmt.Sprintf("agogos-%s", store.Name)})
+				if err != nil {
+					continue //skip this storage, should be cleaned up later by a watcher
+				}
+			}
+		}
 		go Components.StartComponent(comp, app.Name)
 	}
 }
