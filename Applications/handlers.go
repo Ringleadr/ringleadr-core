@@ -4,7 +4,6 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,10 +14,12 @@ func CreateApplication(ctx *gin.Context) {
 	app := &Datatypes.Application{}
 	err := ctx.BindJSON(app)
 	if err != nil {
-		println("bind error")
-		spew.Dump(err)
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
+	}
+
+	if app.Copies < 1 {
+		app.Copies = 1
 	}
 
 	for _, comp := range app.Components {
@@ -84,12 +85,19 @@ func UpdateApplication() {
 
 func DeleteApplication(ctx *gin.Context) {
 	name := ctx.Param("name")
-	err := Datastore.DeleteApp(name)
+
+	app, err := getAppFromName(name)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = Datastore.DeleteApp(name)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
-	go Components.DeleteAllComponents(name)
+	go Components.DeleteAllComponents(name, app.Copies)
 	ctx.JSON(http.StatusOK, nil)
 }

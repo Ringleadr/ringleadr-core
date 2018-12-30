@@ -155,6 +155,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 
 	containers, err := d.ReadAllContainersWithFilter(filter)
 	if err != nil {
+		log.Println("Error retrieving containers with filter: ", filter, err.Error())
 		return err
 	}
 

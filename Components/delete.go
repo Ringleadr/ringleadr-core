@@ -1,15 +1,20 @@
 package Components
 
 import (
+	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 )
 
-func DeleteAllComponents(appName string) error {
-	filter := map[string]map[string]bool{
-		"label": {
-			"agogos.owned.by=" + appName: true,
-		},
-	}
+func DeleteAllComponents(appName string, appCopies int) error {
 	runtime := Containers.GetContainerRuntime()
-	return runtime.DeleteContainerWithFilter(filter)
+	for i := 0; i < appCopies; i++ {
+		filter := map[string]map[string]bool{
+			"label": {
+				fmt.Sprintf("agogos.owned.by=%s-%d", appName, i): true,
+			},
+		}
+		go runtime.DeleteContainerWithFilter(filter)
+		//Ignore any errors and hope they are fixed later
+	}
+	return nil
 }

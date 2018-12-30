@@ -102,16 +102,18 @@ func unMarshalIntoStorage(m bson.M, store *Datatypes.Storage) {
 }
 
 func createComponentsFor(app *Datatypes.Application) {
-	for _, comp := range app.Components {
-		for _, store := range comp.Storage {
-			if s, err := GetStorage(fmt.Sprintf("agogos-%s", store.Name)); s == nil && err == nil {
-				err := InsertStorage(&Datatypes.Storage{Name: fmt.Sprintf("agogos-%s", store.Name)})
-				if err != nil {
-					continue //skip this storage, should be cleaned up later by a watcher
+	for i := 0; i < app.Copies; i++ {
+		for _, comp := range app.Components {
+			for _, store := range comp.Storage {
+				if s, err := GetStorage(fmt.Sprintf("agogos-%s", store.Name)); s == nil && err == nil {
+					err := InsertStorage(&Datatypes.Storage{Name: fmt.Sprintf("agogos-%s", store.Name)})
+					if err != nil {
+						continue //skip this storage, should be cleaned up later by a watcher
+					}
 				}
 			}
+			go Components.StartComponent(comp, app.Name, i)
 		}
-		go Components.StartComponent(comp, app.Name)
 	}
 }
 

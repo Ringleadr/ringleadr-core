@@ -29,6 +29,6 @@ func GetContainerRuntime() ContainerRuntime {
 	return containerRuntime
 }
 
-func GetContainerNameForComponent(componentName string, appName string, replicaNo int) string {
-	return fmt.Sprintf("agogos-%s-%s-%d", appName, componentName, replicaNo)
+func GetContainerNameForComponent(componentName string, appName string, appCopy int, replicaNo int) string {
+	return fmt.Sprintf("agogos-%s-%d-%s-%d", appName, appCopy, componentName, replicaNo)
 }

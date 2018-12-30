@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func StartComponent(comp *Datatypes.Component, appName string) error {
+func StartComponent(comp *Datatypes.Component, appName string, appCopy int) error {
 	if comp.Name == "" {
 		comp.Name = comp.Image
 	}
@@ -18,20 +18,20 @@ func StartComponent(comp *Datatypes.Component, appName string) error {
 	}
 
 	runtime := Containers.GetContainerRuntime()
-	var storeage []Containers.StorageMount
+	var storage []Containers.StorageMount
 	for _, s := range comp.Storage {
-		storeage = append(storeage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
+		storage = append(storage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
 	}
 	for i := 0; i < comp.Replicas; i++ {
 		cont := &Containers.Container{
-			Name:  Containers.GetContainerNameForComponent(comp.Name, appName, i),
+			Name:  Containers.GetContainerNameForComponent(comp.Name, appName, appCopy, i),
 			Image: comp.Image,
 			Labels: map[string]string{
 				"agogos.managed":  "",
-				"agogos.owned.by": appName,
-				fmt.Sprintf("agogos.%s.%s.replica", appName, comp.Name): strconv.Itoa(i),
+				"agogos.owned.by": fmt.Sprintf("%s-%d", appName, appCopy),
+				fmt.Sprintf("agogos.%s.%d.%s.replica", appName, appCopy, comp.Name): strconv.Itoa(i),
 			},
-			Storage: storeage,
+			Storage: storage,
 		}
 		err := runtime.CreateContainer(cont)
 		if err != nil {
