@@ -3,6 +3,7 @@ package Containers
 import (
 	"fmt"
 	"github.com/docker/docker/client"
+	"strings"
 )
 
 var dockerClient *client.Client
@@ -30,5 +31,8 @@ func GetContainerRuntime() ContainerRuntime {
 }
 
 func GetContainerNameForComponent(componentName string, appName string, appCopy int, replicaNo int) string {
-	return fmt.Sprintf("agogos-%s-%d-%s-%d", appName, appCopy, componentName, replicaNo)
+	return strings.Replace(
+		strings.Replace(
+			fmt.Sprintf("agogos-%s-%d-%s-%d", appName, appCopy, componentName, replicaNo),
+			":", "_", -1), "/", ".", -1)
 }

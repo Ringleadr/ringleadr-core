@@ -12,6 +12,7 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"log"
+	"strings"
 )
 
 type DockerRuntime struct{}
@@ -31,6 +32,14 @@ func (DockerRuntime) AssertOnline() error {
 func (DockerRuntime) CreateContainer(cont *Container) error {
 	cli := GetDockerClient()
 	ctx := context.Background()
+
+	if !strings.Contains(cont.Image, "/") {
+		cont.Image = fmt.Sprintf("docker.io/library/%s", cont.Image)
+	}
+
+	if !strings.Contains(cont.Image, ":") {
+		cont.Image = fmt.Sprintf("%s:latest", cont.Image)
+	}
 
 	//reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
 	//if err != nil {
@@ -210,6 +219,11 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 	if len(dockerCont.Names) < 0 {
 		return nil, errors.New(fmt.Sprintf("Container %s has no name", dockerCont.ID))
 	}
+	stringPorts := make(map[string]string)
+	for _, port := range dockerCont.Ports {
+		stringPorts[string(port.PublicPort)] = string(port.PrivatePort)
+	}
+
 	//TODO try to get env here
 	cont := &Container{
 		ID:     dockerCont.ID,
@@ -217,8 +231,7 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 		Name:   dockerCont.Names[0],
 		Labels: dockerCont.Labels,
 		Status: fmt.Sprintf("%s: %s", dockerCont.State, dockerCont.Status),
+		Ports:  stringPorts,
 	}
 	return cont, nil
 }
-
-//TODO handle ports when in interface

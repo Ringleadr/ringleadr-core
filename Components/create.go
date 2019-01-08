@@ -5,16 +5,11 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"strconv"
-	"strings"
 )
 
 func StartComponent(comp *Datatypes.Component, appName string, appCopy int) error {
 	if comp.Name == "" {
 		comp.Name = comp.Image
-	}
-
-	if !strings.Contains(comp.Image, "/") {
-		comp.Image = fmt.Sprintf("docker.io/library/%s", comp.Image)
 	}
 
 	runtime := Containers.GetContainerRuntime()
@@ -32,6 +27,7 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int) erro
 				fmt.Sprintf("agogos.%s.%d.%s.replica", appName, appCopy, comp.Name): strconv.Itoa(i),
 			},
 			Storage: storage,
+			Ports:   comp.Ports,
 		}
 		err := runtime.CreateContainer(cont)
 		if err != nil {
