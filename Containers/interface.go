@@ -31,4 +31,6 @@ type ContainerRuntime interface {
 	DeleteContainerWithFilter(filter map[string]map[string]bool) error
 	CreateStorage(name string) error
 	DeleteStorage(name string) error
+	CreateNetwork(name string) error
+	DeleteNetwork(name string) error
 }

@@ -203,6 +203,28 @@ func (DockerRuntime) DeleteStorage(name string) error {
 	return nil
 }
 
+func (DockerRuntime) CreateNetwork(name string) error {
+	cli := GetDockerClient()
+
+	_, err := cli.NetworkCreate(context.Background(), name, types.NetworkCreate{})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+func (DockerRuntime) DeleteNetwork(name string) error {
+	cli := GetDockerClient()
+
+	err := cli.NetworkRemove(context.Background(), name)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
 func dockerContainersToInterface(containers ...types.Container) ([]*Container, error) {
 	var returnContainers []*Container
 	for _, cont := range containers {

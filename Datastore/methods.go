@@ -82,3 +82,41 @@ func GetStorage(name string) (*Datatypes.Storage, error) {
 	}
 	return storage, err
 }
+
+func InsertNetwork(network *Datatypes.Network) error {
+	err := networkCollection.Insert(network)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteNetwork(name string) error {
+	//TODO returns empty error when it can't delete the required item
+	err := networkCollection.Remove(bson.M{"name": name})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAllNetworks() ([]Datatypes.Network, error) {
+	var networks []Datatypes.Network
+	err := networkCollection.Find(bson.M{}).All(&networks)
+	if err != nil {
+		return nil, err
+	}
+	return networks, nil
+}
+
+func GetNetwork(name string) (*Datatypes.Network, error) {
+	network := &Datatypes.Network{}
+	err := storageCollection.Find(bson.M{"name": name}).One(network)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return network, err
+}

@@ -13,6 +13,7 @@ var (
 	agogosDB              *mgo.Database
 	applicationCollection *mgo.Collection
 	storageCollection     *mgo.Collection
+	networkCollection     *mgo.Collection
 )
 
 func SetupDatastore() {
@@ -82,12 +83,14 @@ func setupTables() {
 	applicationCollection = coll
 	storage := db.C("storage")
 	storageCollection = storage
+	network := db.C("networks")
+	networkCollection = network
 }
 
 func startWatchers() {
 	go watchApplications(applicationCollection)
 	go watchStorage(storageCollection)
-	//TODO start network watcher
+	go watchNetworks(networkCollection)
 }
 
 func waitUntilReady() {

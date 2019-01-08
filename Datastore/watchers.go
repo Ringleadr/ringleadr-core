@@ -54,6 +54,28 @@ func watchStorage(coll *mgo.Collection) {
 	watchGeneralCollection(coll, funcs)
 }
 
+func watchNetworks(coll *mgo.Collection) {
+	var insertFunc = func(changeDoc bson.M) {
+		var network Datatypes.Network
+		unMarshalIntoNetwork(changeDoc, &network)
+		err := CreateNetworkInRuntime(network.Name)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	var deleteFunc = func(changeDoc bson.M) {
+		//Again, mongo delete events don't contain the data. no-op function
+	}
+
+	var funcs = map[string]func(m bson.M){
+		"insert": insertFunc,
+		"delete": deleteFunc,
+	}
+
+	watchGeneralCollection(coll, funcs)
+}
+
 func watchGeneralCollection(coll *mgo.Collection, funcs map[string]func(changeDoc bson.M)) {
 	var pipeline []bson.M
 	var changeDoc bson.M
@@ -101,6 +123,18 @@ func unMarshalIntoStorage(m bson.M, store *Datatypes.Storage) {
 	}
 }
 
+func unMarshalIntoNetwork(m bson.M, net *Datatypes.Network) {
+	bsonBytes, err := bson.Marshal(m["fullDocument"])
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	err = bson.Unmarshal(bsonBytes, &net)
+	if err != nil {
+		log.Print(err)
+	}
+}
+
 func createComponentsFor(app *Datatypes.Application) {
 	for i := 0; i < app.Copies; i++ {
 		for _, comp := range app.Components {
@@ -131,6 +165,24 @@ func CreateStorageInRuntime(name string) error {
 func DeleteStorageInRuntime(name string) error {
 	runtime := Containers.GetContainerRuntime()
 	err := runtime.DeleteStorage(name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateNetworkInRuntime(name string) error {
+	runtime := Containers.GetContainerRuntime()
+	err := runtime.CreateNetwork(name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteNetworkInRuntime(name string) error {
+	runtime := Containers.GetContainerRuntime()
+	err := runtime.DeleteNetwork(name)
 	if err != nil {
 		return err
 	}
