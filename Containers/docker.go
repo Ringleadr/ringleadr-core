@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
@@ -70,12 +71,24 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		Env:          cont.Env,
 		ExposedPorts: ports,
 	}, &container.HostConfig{
-		PortBindings: portBind,
-		Mounts:       mounts,
+		PortBindings:  portBind,
+		Mounts:        mounts,
+		RestartPolicy: container.RestartPolicy{Name: "always"},
 	}, nil, cont.Name)
 	if err != nil {
 		log.Println("Error Creating container: ", err.Error())
 		return err
+	}
+
+	for _, net := range cont.Networks {
+		settings := &network.EndpointSettings{}
+		if cont.Alias != "" {
+			settings.Aliases = []string{cont.Alias}
+		}
+		if err := cli.NetworkConnect(ctx, net, resp.ID, settings); err != nil {
+			log.Println("error attaching container to network", resp.ID, err)
+			return err
+		}
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {

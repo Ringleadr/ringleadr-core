@@ -3,6 +3,7 @@ package Applications
 import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
+	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -98,6 +99,9 @@ func DeleteApplication(ctx *gin.Context) {
 		return
 	}
 	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
+	//Delete the implicit application network
 	go Components.DeleteAllComponents(name, app.Copies)
+	//TODO fix the delete as you can't delete a network in use and the delete call happens before all the containers have been removed
+	go Containers.GetContainerRuntime().DeleteNetwork(app.Name)
 	ctx.JSON(http.StatusOK, nil)
 }

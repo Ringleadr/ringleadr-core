@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Storage"
 	"github.com/gin-gonic/gin"
 	"log"
+	"runtime"
 )
 
 var getMethods = map[string]func(ctx *gin.Context){
@@ -36,8 +37,11 @@ var deleteMethods = map[string]func(ctx *gin.Context){
 
 func main() {
 	//TODO Take from environment
-	runtime := Containers.DockerRuntime{}
-	Containers.SetupConfig(runtime)
+	containerRuntime := Containers.DockerRuntime{}
+	Containers.SetupConfig(containerRuntime)
+
+	//Use multiple cores for efficiency
+	runtime.GOMAXPROCS(4)
 
 	Datastore.SetupDatastore()
 	r := setupRouter()

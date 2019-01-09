@@ -16,6 +16,10 @@ func watchApplications(coll *mgo.Collection) {
 	var insertFunc = func(changeDoc bson.M) {
 		var app Datatypes.Application
 		unMarshalIntoApp(changeDoc, &app)
+		//Create an implicit network for this application
+		//TODO deal with err better
+		//TODO don't create a network if one already exists
+		_ = Containers.GetContainerRuntime().CreateNetwork(app.Name)
 		createComponentsFor(&app)
 	}
 

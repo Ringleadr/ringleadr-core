@@ -8,6 +8,7 @@ import (
 )
 
 func StartComponent(comp *Datatypes.Component, appName string, appCopy int) error {
+	origName := comp.Name
 	if comp.Name == "" {
 		comp.Name = comp.Image
 	}
@@ -28,6 +29,9 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int) erro
 			},
 			Storage: storage,
 			Ports:   comp.Ports,
+			//TODO add networks to the Agogos datatype and deal with multiple networks here
+			Networks: []string{appName},
+			Alias:    origName,
 		}
 		err := runtime.CreateContainer(cont)
 		if err != nil {

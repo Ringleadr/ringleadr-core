@@ -3,14 +3,16 @@
 package Containers
 
 type Container struct {
-	ID      string            `json:"id"`
-	Image   string            `json:"image"`
-	Name    string            `json:"name"`
-	Labels  map[string]string `json:"labels"`
-	Status  string            `json:"status"`
-	Env     []string          `json:"env"`
-	Ports   map[string]string `json:"ports"`
-	Storage []StorageMount    `json:"storage"`
+	ID       string            `json:"id"`
+	Image    string            `json:"image"`
+	Name     string            `json:"name"`
+	Labels   map[string]string `json:"labels"`
+	Status   string            `json:"status"`
+	Env      []string          `json:"env"`
+	Ports    map[string]string `json:"ports"`
+	Storage  []StorageMount    `json:"storage"`
+	Networks []string          `json:"networks"`
+	Alias    string            `json:"alias"`
 }
 
 type StorageMount struct {

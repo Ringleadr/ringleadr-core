@@ -26,6 +26,7 @@ func SetupDatastore() {
 	if !(err == nil && strings.Contains(cont.Status, "running")) {
 
 		log.Println("Creating new datastore. This may take some time.")
+		//TODO give a docker volume
 
 		//Create a new data store
 		config := &Containers.Container{
