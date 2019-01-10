@@ -7,6 +7,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 //Create new application
@@ -101,7 +102,15 @@ func DeleteApplication(ctx *gin.Context) {
 	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
 	//Delete the implicit application network
 	go Components.DeleteAllComponents(name, app.Copies)
-	//TODO fix the delete as you can't delete a network in use and the delete call happens before all the containers have been removed
-	go Containers.GetContainerRuntime().DeleteNetwork(app.Name)
+	go func() {
+		retries := 5
+		for retries > 0 {
+			if err := Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
+				return
+			}
+			time.Sleep(10 * time.Second)
+			retries -= 1
+		}
+	}()
 	ctx.JSON(http.StatusOK, nil)
 }

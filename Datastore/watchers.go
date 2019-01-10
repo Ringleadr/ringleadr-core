@@ -17,10 +17,16 @@ func watchApplications(coll *mgo.Collection) {
 		var app Datatypes.Application
 		unMarshalIntoApp(changeDoc, &app)
 		//Create an implicit network for this application
-		//TODO deal with err better
-		//TODO don't create a network if one already exists
-		_ = Containers.GetContainerRuntime().CreateNetwork(app.Name)
-		createComponentsFor(&app)
+		runtime := Containers.GetContainerRuntime()
+		exists, err := runtime.NetworkExists(app.Name)
+		if err != nil {
+			//TODO deal with err better
+		} else {
+			if !exists {
+				_ = Containers.GetContainerRuntime().CreateNetwork(app.Name)
+			}
+			createComponentsFor(&app)
+		}
 	}
 
 	var deleteFunc = func(changeDoc bson.M) {

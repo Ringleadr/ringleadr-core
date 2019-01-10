@@ -35,4 +35,5 @@ type ContainerRuntime interface {
 	DeleteStorage(name string) error
 	CreateNetwork(name string) error
 	DeleteNetwork(name string) error
+	NetworkExists(name string) (bool, error)
 }

@@ -238,6 +238,21 @@ func (DockerRuntime) DeleteNetwork(name string) error {
 	return nil
 }
 
+func (DockerRuntime) NetworkExists(name string) (bool, error) {
+	cli := GetDockerClient()
+
+	_, err := cli.NetworkInspect(context.Background(), name)
+	if err != nil {
+		if strings.Contains(err.Error(), "No such network") {
+			return false, nil
+		}
+		fmt.Println("Error checking network: ", err)
+		return false, err
+	}
+
+	return true, nil
+}
+
 func dockerContainersToInterface(containers ...types.Container) ([]*Container, error) {
 	var returnContainers []*Container
 	for _, cont := range containers {
