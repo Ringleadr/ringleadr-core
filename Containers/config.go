@@ -10,7 +10,7 @@ var dockerClient *client.Client
 var containerRuntime ContainerRuntime
 
 func SetupConfig(runtime ContainerRuntime) {
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
 	if err != nil {
 		panic(err)
 	}

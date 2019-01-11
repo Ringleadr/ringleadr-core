@@ -12,7 +12,9 @@ import (
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
+	"io"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -24,6 +26,7 @@ func (DockerRuntime) AssertOnline() error {
 
 	_, err := cli.ServerVersion(ctx)
 	if err != nil {
+		log.Println("error communicating with docker:", err)
 		panic("Agogos requires Docker to be running to start")
 	}
 
@@ -42,12 +45,23 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		cont.Image = fmt.Sprintf("%s:latest", cont.Image)
 	}
 
-	//reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
-	//if err != nil {
-	//	log.Println("Error pulling image: ", err.Error())
-	//	return err
-	//}
-	//_, _ = io.Copy(os.Stdout, reader)
+	shouldPull := true
+	//Check if image exists locally, if it does then don't pull, otherwise do
+	if _, _, err := cli.ImageInspectWithRaw(ctx, cont.Image); err == nil {
+		shouldPull = false
+	} else {
+		log.Println(err)
+	}
+
+	if shouldPull {
+		//Container create does not pull missing images, so we force a pull
+		reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
+		if err != nil {
+			log.Println("Error pulling image: ", err.Error())
+			return err
+		}
+		_, _ = io.Copy(os.Stdout, reader)
+	}
 
 	ports := nat.PortSet{}
 	portBind := nat.PortMap{}
@@ -62,7 +76,8 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 
 	mounts := []mount.Mount{}
 	for _, store := range cont.Storage {
-		mounts = append(mounts, mount.Mount{Type: mount.TypeVolume, Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
+		mounts = append(mounts, mount.Mount{Type: mount.TypeVolume,
+			Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
 	}
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
@@ -197,7 +212,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 func (DockerRuntime) CreateStorage(name string) error {
 	cli := GetDockerClient()
 
-	_, err := cli.VolumeCreate(context.Background(), volume.VolumesCreateBody{Name: name})
+	_, err := cli.VolumeCreate(context.Background(), volume.VolumeCreateBody{Name: name})
 	if err != nil {
 		log.Println(err)
 		return err
@@ -241,7 +256,7 @@ func (DockerRuntime) DeleteNetwork(name string) error {
 func (DockerRuntime) NetworkExists(name string) (bool, error) {
 	cli := GetDockerClient()
 
-	_, err := cli.NetworkInspect(context.Background(), name)
+	_, err := cli.NetworkInspect(context.Background(), name, types.NetworkInspectOptions{})
 	if err != nil {
 		if strings.Contains(err.Error(), "No such network") {
 			return false, nil
