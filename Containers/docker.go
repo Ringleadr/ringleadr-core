@@ -50,7 +50,10 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	if _, _, err := cli.ImageInspectWithRaw(ctx, cont.Image); err == nil {
 		shouldPull = false
 	} else {
-		log.Println(err)
+		errString := err.Error()
+		if !strings.Contains(errString, "No such image") {
+			log.Println("error checking if image exists: ", cont.Image, errString)
+		}
 	}
 
 	if shouldPull {
