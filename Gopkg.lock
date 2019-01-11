@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:902105c24fd1521ec918fd4aecd35dfa65e129d5a4f3bf8f61dba42e3860d261"
+  digest = "1:dada4172947c7c8ae4527caf6a3f6ca093cb06c4788c8362148ace3fc6d224d3"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c17e9eeffabdec52be0233d6ca5110d3e5572352"
+  revision = "d9452a19eb9f988d8876c32f644fd49a6a4e2f6b"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -183,18 +183,18 @@
     "proxy",
   ]
   pruneopts = "UT"
-  revision = "395948e2f546cb82afa9e1f6d1a6e87849b9af1d"
+  revision = "915654e7eabcea33ae277abbecf52f0d8b7a9fdc"
 
 [[projects]]
   branch = "master"
-  digest = "1:12ef3ef293a3a3930a82e5f38a3c45a1b03a9ed72dedc192d90e89d59b1f13a5"
+  digest = "1:5ee4df7ab18e945607ac822de8d10b180baea263b5e8676a1041727543b9c1e4"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "7fbe1cd0fcc20051e1fcb87fbabec4a1bacaaeba"
+  revision = "48ac38b7c8cbedd50b1613c0fccacfc7d88dfcdf"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"
@@ -221,6 +221,7 @@
     "github.com/docker/docker/api/types/container",
     "github.com/docker/docker/api/types/filters",
     "github.com/docker/docker/api/types/mount",
+    "github.com/docker/docker/api/types/network",
     "github.com/docker/docker/api/types/volume",
     "github.com/docker/docker/client",
     "github.com/docker/go-connections/nat",
