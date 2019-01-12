@@ -1,6 +1,7 @@
 package Applications
 
 import (
+	"fmt"
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
@@ -96,6 +97,10 @@ func DeleteApplication(ctx *gin.Context) {
 
 	err = Datastore.DeleteApp(name)
 	if err != nil {
+		if err.Error() == "not found" {
+			ctx.JSON(http.StatusNotFound, fmt.Sprintf("Application %s does not exist", name))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
