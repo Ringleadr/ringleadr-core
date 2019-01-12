@@ -108,7 +108,7 @@ func DeleteApplication(ctx *gin.Context) {
 			if err := Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
 				return
 			}
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 			retries -= 1
 		}
 	}()

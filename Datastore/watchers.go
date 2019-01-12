@@ -8,6 +8,7 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"log"
+	"time"
 )
 
 //Watch actions
@@ -18,6 +19,21 @@ func watchApplications(coll *mgo.Collection) {
 		unMarshalIntoApp(changeDoc, &app)
 		//Create an implicit network for this application
 		runtime := Containers.GetContainerRuntime()
+		//For all the networks defined in the app, create them if they don't already exist
+		for _, net := range app.Networks {
+			formatName := fmt.Sprintf("agogos-%s", net)
+			fetchedNetwork, err := GetNetwork(formatName)
+			if err != nil {
+				//TODO something with error
+				continue
+			}
+			if fetchedNetwork == nil {
+				_ = InsertNetwork(&Datatypes.Network{Name: formatName})
+			}
+		}
+		//Give a little bit of time for the networks to start
+		time.Sleep(1 * time.Second)
+		//Create implicit network for this app
 		exists, err := runtime.NetworkExists(app.Name)
 		if err != nil {
 			//TODO deal with err better
@@ -25,8 +41,9 @@ func watchApplications(coll *mgo.Collection) {
 			if !exists {
 				_ = Containers.GetContainerRuntime().CreateNetwork(app.Name)
 			}
-			createComponentsFor(&app)
 		}
+		//finally create app
+		createComponentsFor(&app)
 	}
 
 	var deleteFunc = func(changeDoc bson.M) {
@@ -156,7 +173,7 @@ func createComponentsFor(app *Datatypes.Application) {
 					}
 				}
 			}
-			go Components.StartComponent(comp, app.Name, i)
+			go Components.StartComponent(comp, app.Name, i, app.Networks)
 		}
 	}
 }

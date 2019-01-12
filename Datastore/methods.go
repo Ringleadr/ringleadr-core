@@ -111,7 +111,7 @@ func GetAllNetworks() ([]Datatypes.Network, error) {
 
 func GetNetwork(name string) (*Datatypes.Network, error) {
 	network := &Datatypes.Network{}
-	err := storageCollection.Find(bson.M{"name": name}).One(network)
+	err := networkCollection.Find(bson.M{"name": name}).One(network)
 	if err != nil {
 		if err.Error() == "not found" {
 			return nil, nil

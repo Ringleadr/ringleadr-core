@@ -7,10 +7,15 @@ import (
 	"strconv"
 )
 
-func StartComponent(comp *Datatypes.Component, appName string, appCopy int) error {
+func StartComponent(comp *Datatypes.Component, appName string, appCopy int, networks []string) error {
 	origName := comp.Name
 	if comp.Name == "" {
 		comp.Name = comp.Image
+	}
+
+	var newNetworks = []string{appName}
+	for _, net := range networks {
+		newNetworks = append(newNetworks, fmt.Sprintf("agogos-%s", net))
 	}
 
 	runtime := Containers.GetContainerRuntime()
@@ -30,7 +35,7 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int) erro
 			Storage: storage,
 			Ports:   comp.Ports,
 			//TODO add networks to the Agogos datatype and deal with multiple networks here
-			Networks: []string{appName},
+			Networks: newNetworks,
 			Alias:    origName,
 		}
 		err := runtime.CreateContainer(cont)
