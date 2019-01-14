@@ -22,7 +22,6 @@ func startSync() {
 func syncTick(runtime Containers.ContainerRuntime) {
 	//TODO Deal with networks and storage here too
 	//TODO this doesn't create a network if an application needs one
-	log.Printf("tick")
 	//Check datastore is up
 	cont, err := runtime.ReadContainer("agogos-mongo-primary")
 	if !(err == nil && strings.Contains(cont.Status, "running")) {

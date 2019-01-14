@@ -123,6 +123,10 @@ func watchGeneralCollection(coll *mgo.Collection, funcs map[string]func(changeDo
 			//TODO rest
 			//spew.Dump(changeDoc)
 		}
+		err = stream.Err()
+		if err != nil {
+			log.Printf("error whilst watching stream: %s", err.Error())
+		}
 	}
 }
 

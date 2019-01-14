@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Storage"
 	"github.com/gin-gonic/gin"
 	"log"
+	"math"
 	"runtime"
 )
 
@@ -41,7 +42,7 @@ func main() {
 	Containers.SetupConfig(containerRuntime)
 
 	//Use multiple cores for efficiency
-	runtime.GOMAXPROCS(4)
+	runtime.GOMAXPROCS(int(math.Min(float64(runtime.NumCPU()), 4)))
 
 	Datastore.SetupDatastore()
 	r := setupRouter()
