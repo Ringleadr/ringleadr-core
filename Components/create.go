@@ -70,9 +70,8 @@ func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy in
 			"agogos.owned.by": fmt.Sprintf("%s-%d", appName, appCopy),
 			fmt.Sprintf("agogos.%s.%d.%s.replica", appName, appCopy, comp.Name): strconv.Itoa(replica),
 		},
-		Storage: storage,
-		Ports:   comp.Ports,
-		//TODO add networks to the Agogos datatype and deal with multiple networks here
+		Storage:  storage,
+		Ports:    comp.Ports,
 		Networks: newNetworks,
 		Alias:    origName,
 	}

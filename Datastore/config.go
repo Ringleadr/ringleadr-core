@@ -57,6 +57,7 @@ func startDatastoreContainer(runtime Containers.ContainerRuntime) {
 		Ports: map[string]string{
 			"27017": "27017",
 		},
+		Storage: []Containers.StorageMount{{Name: "agogos-mongo-primary-storage", MountPath: "/bitnami"}},
 	}
 
 	if err := runtime.CreateContainer(config); err != nil {

@@ -186,8 +186,16 @@ func (DockerRuntime) UpdateContainer(container *Container) error {
 }
 
 func (DockerRuntime) DeleteContainer(id string) error {
-	//TODO Implement
-	panic("implement me")
+	cli := GetDockerClient()
+	err := cli.ContainerRemove(context.Background(), id, types.ContainerRemoveOptions{
+		RemoveVolumes: true,
+		Force:         true,
+	})
+	if err != nil {
+		log.Println("Error deleting container", err.Error())
+		return err
+	}
+	return nil
 }
 
 func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bool) error {
