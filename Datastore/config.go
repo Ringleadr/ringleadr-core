@@ -25,27 +25,7 @@ func SetupDatastore() {
 	cont, err := runtime.ReadContainer("agogos-mongo-primary")
 	if !(err == nil && strings.Contains(cont.Status, "running")) {
 
-		log.Println("Creating new datastore. This may take some time.")
-		//TODO give a docker volume
-
-		//Create a new data store
-		config := &Containers.Container{
-			Name:  "agogos-mongo-primary",
-			Image: "bitnami/mongodb:3.6.8",
-			Labels: map[string]string{
-				"agogos-mongo": "primary",
-			},
-			Env: []string{
-				"MONGODB_REPLICA_SET_MODE=primary",
-			},
-			Ports: map[string]string{
-				"27017": "27017",
-			},
-		}
-
-		if err := runtime.CreateContainer(config); err != nil {
-			panic("Could not start backing Datastore")
-		}
+		startDatastoreContainer(runtime)
 
 		//Sleep to give time for db to start
 		//TODO do this is a more programatic way
@@ -57,6 +37,31 @@ func SetupDatastore() {
 	getClient()
 	setupTables()
 	startWatchers()
+	startSync()
+}
+
+func startDatastoreContainer(runtime Containers.ContainerRuntime) {
+	log.Println("Creating new datastore. This may take some time.")
+	//TODO give a docker volume
+
+	//Create a new data store
+	config := &Containers.Container{
+		Name:  "agogos-mongo-primary",
+		Image: "bitnami/mongodb:3.6.8",
+		Labels: map[string]string{
+			"agogos-mongo": "primary",
+		},
+		Env: []string{
+			"MONGODB_REPLICA_SET_MODE=primary",
+		},
+		Ports: map[string]string{
+			"27017": "27017",
+		},
+	}
+
+	if err := runtime.CreateContainer(config); err != nil {
+		panic("Could not start backing Datastore")
+	}
 }
 
 func getClient() {

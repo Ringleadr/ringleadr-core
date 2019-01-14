@@ -45,3 +45,40 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int, netw
 	}
 	return nil
 }
+
+func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy int, networks []string, replica int) error {
+	origName := comp.Name
+	if comp.Name == "" {
+		comp.Name = comp.Image
+	}
+
+	var newNetworks = []string{appName}
+	for _, net := range networks {
+		newNetworks = append(newNetworks, fmt.Sprintf("agogos-%s", net))
+	}
+
+	runtime := Containers.GetContainerRuntime()
+	var storage []Containers.StorageMount
+	for _, s := range comp.Storage {
+		storage = append(storage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
+	}
+	cont := &Containers.Container{
+		Name:  Containers.GetContainerNameForComponent(comp.Name, appName, appCopy, replica),
+		Image: comp.Image,
+		Labels: map[string]string{
+			"agogos.managed":  "",
+			"agogos.owned.by": fmt.Sprintf("%s-%d", appName, appCopy),
+			fmt.Sprintf("agogos.%s.%d.%s.replica", appName, appCopy, comp.Name): strconv.Itoa(replica),
+		},
+		Storage: storage,
+		Ports:   comp.Ports,
+		//TODO add networks to the Agogos datatype and deal with multiple networks here
+		Networks: newNetworks,
+		Alias:    origName,
+	}
+	err := runtime.CreateContainer(cont)
+	if err != nil {
+		return err
+	}
+	return nil
+}
