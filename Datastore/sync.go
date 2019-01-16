@@ -5,6 +5,7 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"log"
 	"strings"
 	"time"
@@ -47,9 +48,9 @@ func syncTick(runtime Containers.ContainerRuntime) {
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
 	}
 
+	createMissingNetworks(networks, runtime)
 	createMissingComponents(apps, containers, runtime)
 	deleteOrphanedContainers(apps, containers, runtime)
-	createMissingNetworks(networks, runtime)
 
 }
 func createMissingComponents(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime) {
@@ -64,12 +65,32 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 					if !lookForMatchingContainer("/"+Containers.GetContainerNameForComponent(comp.Name, app.Name, i, j), containers) {
 						createMissingAppNetworks(app, runtime)
 						createMissingStorage(comp, runtime)
-						go Components.StartComponentReplica(comp, app.Name, i, app.Networks, j)
+						err := Components.StartComponentReplica(comp, app.Name, i, app.Networks, j)
+						if err != nil {
+							Logger.ErrPrintf("Error starting component %s in app %s: %s", comp.Name, app.Name, err.Error())
+							formatError := fmt.Sprintf("Error starting component %s: %s", comp.Name, err.Error())
+							if !stringArrayContains(app.Messages, formatError) {
+								app.Messages = append(app.Messages, formatError)
+								err := UpdateApp(&app)
+								if err != nil {
+									Logger.ErrPrintln("Error saving error message to the application datastore: ", err.Error())
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 	}
+}
+
+func stringArrayContains(arr []string, element string) bool {
+	for _, a := range arr {
+		if a == element {
+			return true
+		}
+	}
+	return false
 }
 
 func createMissingAppNetworks(app Datatypes.Application, runtime Containers.ContainerRuntime) {

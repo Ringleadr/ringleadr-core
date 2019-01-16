@@ -15,6 +15,14 @@ func InsertApp(application *Datatypes.Application) error {
 	return nil
 }
 
+func UpdateApp(application *Datatypes.Application) error {
+	err := applicationCollection.Update(bson.M{"name": application.Name}, application)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetApp(name string) (*Datatypes.Application, error) {
 	app := &Datatypes.Application{}
 	err := applicationCollection.Find(bson.M{"name": name}).One(app)

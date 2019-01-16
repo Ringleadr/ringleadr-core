@@ -52,7 +52,8 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	} else {
 		errString := err.Error()
 		if !strings.Contains(errString, "No such image") {
-			Logger.ErrPrintln("error checking if image exists: ", cont.Image, errString)
+			Logger.ErrPrintln("error checking if image exists: ", cont.Image, errString, "Will try to continue")
+			//Attempt to continue creating container
 		}
 	}
 
@@ -60,8 +61,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		//Container create does not pull missing images, so we force a pull
 		reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
 		if err != nil {
-			Logger.ErrPrintln("Error pulling image: ", err.Error())
-			return err
+			return errors.New("Error pulling image: " + err.Error())
 		}
 		_, _ = io.Copy(os.Stdout, reader)
 	}
@@ -71,7 +71,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	for k, v := range cont.Ports {
 		p, err := nat.NewPort("tcp", v)
 		if err != nil {
-			return err
+			return errors.New("Error creating port: " + err.Error())
 		}
 		ports[p] = struct{}{}
 		portBind[p] = []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: k}}
@@ -94,8 +94,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		RestartPolicy: container.RestartPolicy{Name: "always"},
 	}, nil, cont.Name)
 	if err != nil {
-		Logger.ErrPrintln("Error Creating container: ", err.Error())
-		return err
+		return errors.New("Error Creating container: " + err.Error())
 	}
 
 	for _, net := range cont.Networks {
@@ -104,14 +103,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 			settings.Aliases = []string{cont.Alias}
 		}
 		if err := cli.NetworkConnect(ctx, net, resp.ID, settings); err != nil {
-			Logger.ErrPrintln("error attaching container to network", resp.ID, err)
-			return err
+			return errors.New("error attaching container to network " + resp.ID + " " + err.Error())
 		}
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		Logger.ErrPrintln("Error starting container: ", err.Error())
-		return err
+		return errors.New("Error starting container: " + err.Error())
 	}
 
 	return nil

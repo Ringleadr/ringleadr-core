@@ -1,6 +1,7 @@
 package Datastore
 
 import (
+	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/globalsign/mgo"
@@ -61,7 +62,7 @@ func startDatastoreContainer(runtime Containers.ContainerRuntime) {
 	}
 
 	if err := runtime.CreateContainer(config); err != nil {
-		panic("Could not start backing Datastore")
+		panic(fmt.Sprintf("Could not start backing Datastore: %s", err.Error()))
 	}
 }
 
