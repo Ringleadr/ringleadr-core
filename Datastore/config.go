@@ -36,7 +36,7 @@ func SetupDatastore() {
 
 	getClient()
 	setupTables()
-	startWatchers()
+	//startWatchers()
 	startSync()
 }
 
