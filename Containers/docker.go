@@ -115,7 +115,6 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 }
 
 func (DockerRuntime) ReadContainer(id string) (*Container, error) {
-	//TODO deal with id or name
 	cli := GetDockerClient()
 	ctx := context.Background()
 
@@ -127,12 +126,11 @@ func (DockerRuntime) ReadContainer(id string) (*Container, error) {
 	})
 
 	if err != nil {
-		Logger.ErrPrintln("Error listing containers: ", err.Error())
-		return nil, err
+		return nil, errors.New("Error listing containers: " + err.Error())
 	}
 
 	if len(cont) != 1 {
-		return nil, errors.New("did not return single container")
+		return nil, errors.New("did not return single container for id " + id)
 	}
 	return dockerContainerToInterface(cont[0])
 }
@@ -149,8 +147,7 @@ func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
 		All:     true,
 	})
 	if err != nil {
-		Logger.ErrPrintln("Error listing containers: ", err.Error())
-		return nil, err
+		return nil, errors.New("Error listing containers: " + err.Error())
 	}
 
 	return dockerContainersToInterface(containers...)
@@ -171,8 +168,7 @@ func (DockerRuntime) ReadAllContainersWithFilter(filter map[string]map[string]bo
 		Filters: dockerFilter,
 	})
 	if err != nil {
-		Logger.ErrPrintln("Error listing containers: ", err.Error())
-		return nil, err
+		return nil, errors.New("Error listing containers: " + err.Error())
 	}
 	return dockerContainersToInterface(containers...)
 }
@@ -189,8 +185,7 @@ func (DockerRuntime) DeleteContainer(id string) error {
 		Force:         true,
 	})
 	if err != nil {
-		Logger.ErrPrintln("Error deleting container", err.Error())
-		return err
+		return errors.New(fmt.Sprintf("Error deleting container %s: %s", id, err.Error()))
 	}
 	return nil
 }
@@ -200,8 +195,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 
 	containers, err := d.ReadAllContainersWithFilter(filter)
 	if err != nil {
-		Logger.ErrPrintln("Error retrieving containers with filter: ", filter, err.Error())
-		return err
+		return errors.New(fmt.Sprintf("Error retrieving containers with filter %v: %s", filter, err.Error()))
 	}
 
 	for _, cont := range containers {
@@ -210,8 +204,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 			Force:         true,
 		})
 		if err != nil {
-			Logger.ErrPrintln("Error deleting container", err.Error())
-			return err
+			return errors.New(fmt.Sprintf("Error deleting container %s: %s", cont.Name, err.Error()))
 		}
 	}
 	return nil
@@ -222,8 +215,7 @@ func (DockerRuntime) CreateStorage(name string) error {
 
 	_, err := cli.VolumeCreate(context.Background(), volume.VolumeCreateBody{Name: name})
 	if err != nil {
-		Logger.ErrPrintln("Error creating storage: ", err)
-		return err
+		return errors.New("Error creating storage: " + err.Error())
 	}
 	return nil
 }
@@ -233,8 +225,7 @@ func (DockerRuntime) DeleteStorage(name string) error {
 
 	err := cli.VolumeRemove(context.Background(), name, false)
 	if err != nil {
-		Logger.ErrPrintln("Error deleting storage: ", err)
-		return err
+		return errors.New("Error deleting storage: " + err.Error())
 	}
 	return nil
 }
@@ -244,8 +235,7 @@ func (DockerRuntime) CreateNetwork(name string) error {
 
 	_, err := cli.NetworkCreate(context.Background(), name, types.NetworkCreate{})
 	if err != nil {
-		Logger.ErrPrintln("Error creating network: ", err)
-		return err
+		return errors.New("Error creating network: " + err.Error())
 	}
 	return nil
 }
@@ -255,8 +245,7 @@ func (DockerRuntime) DeleteNetwork(name string) error {
 
 	err := cli.NetworkRemove(context.Background(), name)
 	if err != nil {
-		Logger.ErrPrintln("Error deleting network: ", err)
-		return err
+		return errors.New("Error deleting network: " + err.Error())
 	}
 	return nil
 }
@@ -269,8 +258,7 @@ func (DockerRuntime) NetworkExists(name string) (bool, error) {
 		if strings.Contains(err.Error(), "No such network") {
 			return false, nil
 		}
-		Logger.ErrPrintln("Error checking network: ", err)
-		return false, err
+		return false, errors.New("Error checking network: " + err.Error())
 	}
 
 	return true, nil

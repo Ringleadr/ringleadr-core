@@ -6,6 +6,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -109,13 +110,15 @@ func DeleteApplication(ctx *gin.Context) {
 	go Components.DeleteAllComponents(name, app.Copies)
 	go func() {
 		retries := 5
+		var err error
 		for retries > 0 {
-			if err := Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
+			if err = Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
 				return
 			}
 			time.Sleep(5 * time.Second)
 			retries -= 1
 		}
+		Logger.ErrPrintf("Error deleting implicit network %s: %s", app.Name, err.Error())
 	}()
 	ctx.JSON(http.StatusOK, nil)
 }

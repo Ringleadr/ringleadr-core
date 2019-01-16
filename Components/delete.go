@@ -3,6 +3,7 @@ package Components
 import (
 	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Containers"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 )
 
 func DeleteAllComponents(appName string, appCopies int) error {
@@ -13,7 +14,12 @@ func DeleteAllComponents(appName string, appCopies int) error {
 				fmt.Sprintf("agogos.owned.by=%s-%d", appName, i): true,
 			},
 		}
-		go runtime.DeleteContainerWithFilter(filter)
+		go func(filter map[string]map[string]bool) {
+			err := runtime.DeleteContainerWithFilter(filter)
+			if err != nil {
+				Logger.Printf("Error deleting all Components for app %s: %s", appName, err.Error())
+			}
+		}(filter)
 		//Ignore any errors and hope they are fixed later
 	}
 	return nil

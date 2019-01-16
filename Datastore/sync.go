@@ -22,7 +22,7 @@ func startSync() {
 }
 
 func syncTick(runtime Containers.ContainerRuntime) {
-	//TODO this doesn't create a network if an application needs one
+	//TODO remove old error messages if they are no longer valid
 	//Check datastore is up
 	cont, err := runtime.ReadContainer("agogos-mongo-primary")
 	if !(err == nil && strings.Contains(cont.Status, "running")) {
@@ -98,11 +98,15 @@ func createMissingAppNetworks(app Datatypes.Application, runtime Containers.Cont
 		formatName := fmt.Sprintf("agogos-%s", net)
 		fetchedNetwork, err := GetNetwork(formatName)
 		if err != nil {
-			//TODO something with error
+			Logger.ErrPrintf("Error fetching network %s from datastore: %s", formatName, err.Error())
+			//continue and hope its fixed next go round
 			continue
 		}
 		if fetchedNetwork == nil {
-			_ = InsertNetwork(&Datatypes.Network{Name: formatName})
+			err = InsertNetwork(&Datatypes.Network{Name: formatName})
+			if err != nil {
+				Logger.Printf("Error inserting network %s: %s", formatName, err.Error())
+			}
 		}
 	}
 	//Give a little bit of time for the networks to start
@@ -110,10 +114,14 @@ func createMissingAppNetworks(app Datatypes.Application, runtime Containers.Cont
 	//Create implicit network for this app
 	exists, err := runtime.NetworkExists(app.Name)
 	if err != nil {
-		//TODO deal with err better
+		Logger.ErrPrintf("Error checking for existing implicit network %s: %s", app.Name, err.Error())
+		//Hope it's fixed next go round
 	} else {
 		if !exists {
-			_ = Containers.GetContainerRuntime().CreateNetwork(app.Name)
+			err = Containers.GetContainerRuntime().CreateNetwork(app.Name)
+			if err != nil {
+				Logger.ErrPrintf("Error creating implicit network for %s: %s", app.Name, err.Error())
+			}
 		}
 	}
 }
@@ -145,11 +153,22 @@ func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Contai
 	for _, cont := range containers {
 		//If the container is in created mode (and not running) then let's get rid of it.
 		if cont.Status == "created: Created" {
-			go runtime.DeleteContainer(cont.Name)
+			go func(name string) {
+				err := runtime.DeleteContainer(name)
+				if err != nil {
+					Logger.ErrPrintf("Error deleting container stuck in creating: %s", name, err.Error())
+				}
+			}(cont.Name)
 		}
 		//If the app which owns the container no longer exists then purge
 		if !lookForMatchingApplication(cont.Labels["agogos.owned.by"], apps) {
-			go runtime.DeleteContainer(cont.Name)
+			go func(name string) {
+				err := runtime.DeleteContainer(name)
+				if err != nil {
+					//Don't repeat the name of the container here, the underlying error already contains the name
+					Logger.ErrPrintln(err.Error())
+				}
+			}(cont.Name)
 		}
 	}
 }
@@ -175,7 +194,12 @@ func createMissingNetworks(networks []Datatypes.Network, runtime Containers.Cont
 			continue
 		}
 		if !exists {
-			go runtime.CreateNetwork(net.Name)
+			go func(name string) {
+				err := runtime.CreateNetwork(name)
+				if err != nil {
+					Logger.ErrPrintf("Error creating network %s: %s", name, err.Error())
+				}
+			}(net.Name)
 		}
 	}
 }
