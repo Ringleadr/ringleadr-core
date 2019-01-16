@@ -4,6 +4,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Applications"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Networks"
 	"github.com/GodlikePenguin/agogos-host/Storage"
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,9 @@ var deleteMethods = map[string]func(ctx *gin.Context){
 }
 
 func main() {
+	//TODO be able to set from command line
+	agogosMode := "Primary"
+	Logger.Printf("Starting Agogos in %s mode", agogosMode)
 	//TODO Take from environment
 	containerRuntime := Containers.DockerRuntime{}
 	Containers.SetupConfig(containerRuntime)
@@ -60,5 +64,6 @@ func main() {
 }
 
 func setupRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	return gin.Default()
 }

@@ -2,8 +2,8 @@ package Datastore
 
 import (
 	"github.com/GodlikePenguin/agogos-host/Containers"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/globalsign/mgo"
-	"log"
 	"strings"
 	"time"
 )
@@ -31,7 +31,7 @@ func SetupDatastore() {
 		//TODO do this is a more programatic way
 		time.Sleep(1 * time.Minute)
 	} else {
-		log.Println("Using existing database")
+		Logger.Println("Using existing database")
 	}
 
 	getClient()
@@ -41,7 +41,7 @@ func SetupDatastore() {
 }
 
 func startDatastoreContainer(runtime Containers.ContainerRuntime) {
-	log.Println("Creating new datastore. This may take some time.")
+	Logger.Println("Creating new datastore. This may take some time.")
 	//TODO give a docker volume
 
 	//Create a new data store

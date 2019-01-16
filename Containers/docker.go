@@ -4,6 +4,7 @@ package Containers
 import (
 	"context"
 	"fmt"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -13,7 +14,6 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/pkg/errors"
 	"io"
-	"log"
 	"os"
 	"strings"
 )
@@ -26,7 +26,7 @@ func (DockerRuntime) AssertOnline() error {
 
 	_, err := cli.ServerVersion(ctx)
 	if err != nil {
-		log.Println("error communicating with docker:", err)
+		Logger.ErrPrintln("error communicating with docker:", err)
 		panic("Agogos requires Docker to be running to start")
 	}
 
@@ -52,7 +52,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 	} else {
 		errString := err.Error()
 		if !strings.Contains(errString, "No such image") {
-			log.Println("error checking if image exists: ", cont.Image, errString)
+			Logger.ErrPrintln("error checking if image exists: ", cont.Image, errString)
 		}
 	}
 
@@ -60,7 +60,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		//Container create does not pull missing images, so we force a pull
 		reader, err := cli.ImagePull(ctx, cont.Image, types.ImagePullOptions{})
 		if err != nil {
-			log.Println("Error pulling image: ", err.Error())
+			Logger.ErrPrintln("Error pulling image: ", err.Error())
 			return err
 		}
 		_, _ = io.Copy(os.Stdout, reader)
@@ -94,7 +94,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		RestartPolicy: container.RestartPolicy{Name: "always"},
 	}, nil, cont.Name)
 	if err != nil {
-		log.Println("Error Creating container: ", err.Error())
+		Logger.ErrPrintln("Error Creating container: ", err.Error())
 		return err
 	}
 
@@ -104,13 +104,13 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 			settings.Aliases = []string{cont.Alias}
 		}
 		if err := cli.NetworkConnect(ctx, net, resp.ID, settings); err != nil {
-			log.Println("error attaching container to network", resp.ID, err)
+			Logger.ErrPrintln("error attaching container to network", resp.ID, err)
 			return err
 		}
 	}
 
 	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		log.Println("Error starting container: ", err.Error())
+		Logger.ErrPrintln("Error starting container: ", err.Error())
 		return err
 	}
 
@@ -130,7 +130,7 @@ func (DockerRuntime) ReadContainer(id string) (*Container, error) {
 	})
 
 	if err != nil {
-		log.Println("Error listing containers: ", err.Error())
+		Logger.ErrPrintln("Error listing containers: ", err.Error())
 		return nil, err
 	}
 
@@ -152,7 +152,7 @@ func (DockerRuntime) ReadAllContainers() ([]*Container, error) {
 		All:     true,
 	})
 	if err != nil {
-		log.Println("Error listing containers: ", err.Error())
+		Logger.ErrPrintln("Error listing containers: ", err.Error())
 		return nil, err
 	}
 
@@ -174,7 +174,7 @@ func (DockerRuntime) ReadAllContainersWithFilter(filter map[string]map[string]bo
 		Filters: dockerFilter,
 	})
 	if err != nil {
-		log.Println("Error listing containers: ", err.Error())
+		Logger.ErrPrintln("Error listing containers: ", err.Error())
 		return nil, err
 	}
 	return dockerContainersToInterface(containers...)
@@ -192,7 +192,7 @@ func (DockerRuntime) DeleteContainer(id string) error {
 		Force:         true,
 	})
 	if err != nil {
-		log.Println("Error deleting container", err.Error())
+		Logger.ErrPrintln("Error deleting container", err.Error())
 		return err
 	}
 	return nil
@@ -203,7 +203,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 
 	containers, err := d.ReadAllContainersWithFilter(filter)
 	if err != nil {
-		log.Println("Error retrieving containers with filter: ", filter, err.Error())
+		Logger.ErrPrintln("Error retrieving containers with filter: ", filter, err.Error())
 		return err
 	}
 
@@ -213,7 +213,7 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 			Force:         true,
 		})
 		if err != nil {
-			log.Println("Error deleting container", err.Error())
+			Logger.ErrPrintln("Error deleting container", err.Error())
 			return err
 		}
 	}
@@ -225,7 +225,7 @@ func (DockerRuntime) CreateStorage(name string) error {
 
 	_, err := cli.VolumeCreate(context.Background(), volume.VolumeCreateBody{Name: name})
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error creating storage: ", err)
 		return err
 	}
 	return nil
@@ -236,7 +236,7 @@ func (DockerRuntime) DeleteStorage(name string) error {
 
 	err := cli.VolumeRemove(context.Background(), name, false)
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error deleting storage: ", err)
 		return err
 	}
 	return nil
@@ -247,7 +247,7 @@ func (DockerRuntime) CreateNetwork(name string) error {
 
 	_, err := cli.NetworkCreate(context.Background(), name, types.NetworkCreate{})
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error creating network: ", err)
 		return err
 	}
 	return nil
@@ -258,7 +258,7 @@ func (DockerRuntime) DeleteNetwork(name string) error {
 
 	err := cli.NetworkRemove(context.Background(), name)
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error deleting network: ", err)
 		return err
 	}
 	return nil
@@ -272,7 +272,7 @@ func (DockerRuntime) NetworkExists(name string) (bool, error) {
 		if strings.Contains(err.Error(), "No such network") {
 			return false, nil
 		}
-		fmt.Println("Error checking network: ", err)
+		Logger.ErrPrintln("Error checking network: ", err)
 		return false, err
 	}
 

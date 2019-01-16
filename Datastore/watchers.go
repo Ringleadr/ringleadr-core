@@ -5,9 +5,9 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"log"
 	"time"
 )
 
@@ -65,7 +65,7 @@ func watchStorage(coll *mgo.Collection) {
 		unMarshalIntoStorage(changeDoc, &storage)
 		err := CreateStorageInRuntime(storage.Name)
 		if err != nil {
-			log.Println(err)
+			Logger.ErrPrintln("Error watching storage: ", err)
 		}
 	}
 
@@ -87,7 +87,7 @@ func watchNetworks(coll *mgo.Collection) {
 		unMarshalIntoNetwork(changeDoc, &network)
 		err := CreateNetworkInRuntime(network.Name)
 		if err != nil {
-			log.Println(err)
+			Logger.ErrPrintln("Error watching networks: ", err)
 		}
 	}
 
@@ -125,7 +125,7 @@ func watchGeneralCollection(coll *mgo.Collection, funcs map[string]func(changeDo
 		}
 		err = stream.Err()
 		if err != nil {
-			log.Printf("error whilst watching stream: %s", err.Error())
+			Logger.ErrPrintf("error whilst watching stream: %s", err.Error())
 		}
 	}
 }
@@ -133,36 +133,36 @@ func watchGeneralCollection(coll *mgo.Collection, funcs map[string]func(changeDo
 func unMarshalIntoApp(m bson.M, app *Datatypes.Application) {
 	bsonBytes, err := bson.Marshal(m["fullDocument"])
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error getting bson document: ", err, bsonBytes)
 		return
 	}
 	err = bson.Unmarshal(bsonBytes, &app)
 	if err != nil {
-		log.Print(err)
+		Logger.ErrPrintln("Error unmarshalling bson: ", err)
 	}
 }
 
 func unMarshalIntoStorage(m bson.M, store *Datatypes.Storage) {
 	bsonBytes, err := bson.Marshal(m["fullDocument"])
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error getting bson document: ", err, bsonBytes)
 		return
 	}
 	err = bson.Unmarshal(bsonBytes, &store)
 	if err != nil {
-		log.Print(err)
+		Logger.ErrPrintln("Error unmarshalling bson: ", err)
 	}
 }
 
 func unMarshalIntoNetwork(m bson.M, net *Datatypes.Network) {
 	bsonBytes, err := bson.Marshal(m["fullDocument"])
 	if err != nil {
-		log.Println(err)
+		Logger.ErrPrintln("Error getting bson document: ", err, bsonBytes)
 		return
 	}
 	err = bson.Unmarshal(bsonBytes, &net)
 	if err != nil {
-		log.Print(err)
+		Logger.ErrPrintln("Error unmarshalling bson: ", err)
 	}
 }
 
