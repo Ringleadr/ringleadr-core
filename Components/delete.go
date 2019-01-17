@@ -17,7 +17,7 @@ func DeleteAllComponents(appName string, appCopies int) error {
 		go func(filter map[string]map[string]bool) {
 			err := runtime.DeleteContainerWithFilter(filter)
 			if err != nil {
-				Logger.Printf("Error deleting all Components for app %s: %s", appName, err.Error())
+				Logger.ErrPrintf("Error deleting all Components for app %s: %s", appName, err.Error())
 			}
 		}(filter)
 		//Ignore any errors and hope they are fixed later
