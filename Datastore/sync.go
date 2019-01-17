@@ -56,13 +56,14 @@ func syncTick(runtime Containers.ContainerRuntime) {
 func createMissingComponents(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime) {
 	//Look for components without matching containers (create missing)
 	for _, app := range apps {
+		shouldSave := false
 		for i := 0; i < app.Copies; i++ {
 			for _, comp := range app.Components {
 				if comp.Name == "" {
 					comp.Name = comp.Image
 				}
 				for j := 0; j < comp.Replicas; j++ {
-					if !lookForMatchingContainer("/"+Containers.GetContainerNameForComponent(comp.Name, app.Name, i, j), containers) {
+					if matchingCont := lookForMatchingContainer("/"+Containers.GetContainerNameForComponent(comp.Name, app.Name, i, j), containers); matchingCont == nil {
 						createMissingAppNetworks(app, runtime)
 						createMissingStorage(comp, runtime)
 						err := Components.StartComponentReplica(comp, app.Name, i, app.Networks, j)
@@ -71,14 +72,22 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							formatError := fmt.Sprintf("Error starting component %s: %s", comp.Name, err.Error())
 							if !stringArrayContains(app.Messages, formatError) {
 								app.Messages = append(app.Messages, formatError)
-								err := UpdateApp(&app)
-								if err != nil {
-									Logger.ErrPrintln("Error saving error message to the application datastore: ", err.Error())
-								}
+								shouldSave = true
 							}
+						}
+					} else {
+						if matchingCont.Status != comp.Status {
+							comp.Status = matchingCont.Status
+							shouldSave = true
 						}
 					}
 				}
+			}
+		}
+		if shouldSave {
+			err := UpdateApp(&app)
+			if err != nil {
+				Logger.ErrPrintln("Error updating %s in application datastore: %s", app.Name, err.Error())
 			}
 		}
 	}
@@ -137,15 +146,13 @@ func createMissingStorage(comp *Datatypes.Component, runtime Containers.Containe
 	}
 }
 
-func lookForMatchingContainer(containerName string, conts []*Containers.Container) bool {
-	found := false
+func lookForMatchingContainer(containerName string, conts []*Containers.Container) *Containers.Container {
 	for _, cont := range conts {
 		if cont.Name == containerName {
-			found = true
-			break
+			return cont
 		}
 	}
-	return found
+	return nil
 }
 
 func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime) {

@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:20da912d97e0128108d54b18d5295a3c7b701a786b93bba1659efbcf6eab032a"
+  digest = "1:fb6868d1dbe3208e6fa43e787ad47d9bec93356e7caa026df17d590d2f0811a8"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0257c38f81efe7e9341c0573e2d820e4d961bc55"
+  revision = "6d187eb1c1d4a800a9e07a1b003fb095019810ca"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -206,14 +206,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0150ad9329793acacd98bcbd88492d9e4731824b5d3fbc73a8a1b45eb21acf6b"
+  digest = "1:43cde116ff48f299eddb7e6515677e6d0a2c915854bb05a333877f07c3bb3033"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "a457fd036447854c0c02e89ea439481bdcf941a2"
+  revision = "11f53e03133963fb11ae0588e08b5e0b85be8be5"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"
