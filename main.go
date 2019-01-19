@@ -37,6 +37,10 @@ var deleteMethods = map[string]func(ctx *gin.Context){
 	"/networks/:name":     Networks.DeleteNetwork,
 }
 
+var putMethods = map[string]func(ctx *gin.Context){
+	"/applications": Applications.UpdateApplication,
+}
+
 func main() {
 	//TODO be able to set from command line
 	agogosMode := "Primary"
@@ -58,6 +62,9 @@ func main() {
 	}
 	for path, handler := range deleteMethods {
 		r.DELETE(path, handler)
+	}
+	for path, handler := range putMethods {
+		r.PUT(path, handler)
 	}
 
 	log.Fatal(r.Run(":14440"))

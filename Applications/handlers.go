@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
 )
@@ -22,6 +23,16 @@ func CreateApplication(ctx *gin.Context) {
 		return
 	}
 
+	err = createApplication(app)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func createApplication(app *Datatypes.Application) error {
 	if app.Copies < 1 {
 		app.Copies = 1
 	}
@@ -34,17 +45,14 @@ func CreateApplication(ctx *gin.Context) {
 
 	appExists, _ := getAppFromName(app.Name)
 	if appExists != nil {
-		ctx.JSON(http.StatusInternalServerError, "an app already exists with that name")
-		return
+		return errors.New("an app already exists with that name")
 	}
 
-	err = Datastore.InsertApp(app)
+	err := Datastore.InsertApp(app)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
-		return
+		return err
 	}
-
-	ctx.JSON(http.StatusOK, nil)
+	return nil
 }
 
 func GetApplications(ctx *gin.Context) {
@@ -83,27 +91,53 @@ func getAppFromName(appName string) (*Datatypes.Application, error) {
 	return app, nil
 }
 
-func UpdateApplication() {
+func UpdateApplication(ctx *gin.Context) {
 	//Update a specific application
-}
-
-func DeleteApplication(ctx *gin.Context) {
-	name := ctx.Param("name")
-
-	app, err := getAppFromName(name)
+	//Let's cheat and just delete the original app and create a new one
+	//Get the application from the request body
+	app := &Datatypes.Application{}
+	err := ctx.BindJSON(app)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 
+	code, err := deleteApplication(app.Name)
+	if err != nil {
+		ctx.JSON(code, err)
+	}
+
+	err = createApplication(app)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func DeleteApplication(ctx *gin.Context) {
+	name := ctx.Param("name")
+
+	code, err := deleteApplication(name)
+	if err != nil {
+		ctx.JSON(code, err)
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+func deleteApplication(name string) (int, error) {
+	app, err := getAppFromName(name)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
 	err = Datastore.DeleteApp(name)
 	if err != nil {
 		if err.Error() == "not found" {
-			ctx.JSON(http.StatusNotFound, fmt.Sprintf("Application %s does not exist", name))
-			return
+			return http.StatusNotFound, errors.New(fmt.Sprintf("Application %s does not exist", name))
 		}
-		ctx.JSON(http.StatusInternalServerError, err)
-		return
+		return http.StatusInternalServerError, err
 	}
 	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
 	//Delete the implicit application network
@@ -120,5 +154,5 @@ func DeleteApplication(ctx *gin.Context) {
 		}
 		Logger.ErrPrintf("Error deleting implicit network %s: %s", app.Name, err.Error())
 	}()
-	ctx.JSON(http.StatusOK, nil)
+	return http.StatusOK, nil
 }
