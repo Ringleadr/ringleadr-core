@@ -19,13 +19,13 @@ func CreateApplication(ctx *gin.Context) {
 	app := &Datatypes.Application{}
 	err := ctx.BindJSON(app)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	err = createApplication(app)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -58,7 +58,7 @@ func createApplication(app *Datatypes.Application) error {
 func GetApplications(ctx *gin.Context) {
 	apps, err := Datastore.GetAllApps()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -69,13 +69,13 @@ func GetApplication(ctx *gin.Context) {
 	//Get a specific application
 	appName := ctx.Param("name")
 	if appName == "" {
-		ctx.JSON(http.StatusInternalServerError, "must specify app name")
+		ctx.String(http.StatusInternalServerError, "must specify app name")
 		return
 	}
 
 	app, err := getAppFromName(appName)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -98,18 +98,18 @@ func UpdateApplication(ctx *gin.Context) {
 	app := &Datatypes.Application{}
 	err := ctx.BindJSON(app)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	code, err := deleteApplication(app.Name)
 	if err != nil {
-		ctx.JSON(code, err)
+		ctx.String(code, err.Error())
 	}
 
 	err = createApplication(app)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, nil)
@@ -120,7 +120,7 @@ func DeleteApplication(ctx *gin.Context) {
 
 	code, err := deleteApplication(name)
 	if err != nil {
-		ctx.JSON(code, err)
+		ctx.String(code, err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, nil)
