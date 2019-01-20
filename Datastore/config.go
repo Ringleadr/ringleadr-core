@@ -54,7 +54,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 		}
 	}
 
-	getClient(strings.ToLower(mode))
+	getClient(strings.ToLower(mode), primaryAddress)
 	setupTables()
 	if mode == "Primary" {
 		addThisNode()
@@ -114,11 +114,11 @@ func startSecondaryDatastoreContainer(runtime Containers.ContainerRuntime, addre
 	}
 }
 
-func getClient(mode string) {
+func getClient(mode string, address string) {
 	//Wait until the service is ready
 	waitUntilReady(mode)
 	//setup the client
-	mongoClient = setupClient()
+	mongoClient = setupClient(address)
 }
 
 func setupTables() {
@@ -164,8 +164,13 @@ func waitUntilReady(mode string) {
 	panic("Could not check container status after 20 attempts. Quitting. Last error was: " + lastErr.Error())
 }
 
-func setupClient() *mgo.Session {
-	session, err := mgo.Dial("mongodb://localhost:27017")
+func setupClient(address string) *mgo.Session {
+	if address == "" {
+		address = "localhost"
+	} else {
+		Logger.Printf("Connecting to primary datastore at %s", address)
+	}
+	session, err := mgo.Dial(fmt.Sprintf("mongodb://%s:27017", address))
 	if err != nil {
 		panic(err)
 	}

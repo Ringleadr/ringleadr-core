@@ -94,6 +94,7 @@ func main() {
 			println(err.Error())
 		}
 	}
+	Logger.Println("Ready to serve")
 	log.Fatal(r.Run(":14440"))
 
 }
