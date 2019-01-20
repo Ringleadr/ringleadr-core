@@ -54,7 +54,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 		}
 	}
 
-	getClient()
+	getClient(strings.ToLower(mode))
 	setupTables()
 	if mode == "Primary" {
 		addThisNode()
@@ -78,7 +78,7 @@ func startDatastoreContainer(runtime Containers.ContainerRuntime) {
 			"MONGODB_REPLICA_SET_MODE=primary",
 		},
 		Ports: map[string]string{
-			"27017": "27017",
+			"0.0.0.0:27017": "27017",
 		},
 		Storage: []Containers.StorageMount{{Name: "agogos-mongo-primary-storage", MountPath: "/bitnami"}},
 	}
@@ -104,7 +104,7 @@ func startSecondaryDatastoreContainer(runtime Containers.ContainerRuntime, addre
 			fmt.Sprintf("MONGODB_PRIMARY_HOST=%s", address),
 		},
 		Ports: map[string]string{
-			"27017": "27017",
+			"0.0.0.0:27017": "27017",
 		},
 		Storage: []Containers.StorageMount{{Name: "agogos-mongo-secondary-storage", MountPath: "/bitnami"}},
 	}
@@ -114,9 +114,9 @@ func startSecondaryDatastoreContainer(runtime Containers.ContainerRuntime, addre
 	}
 }
 
-func getClient() {
+func getClient(mode string) {
 	//Wait until the service is ready
-	waitUntilReady()
+	waitUntilReady(mode)
 	//setup the client
 	mongoClient = setupClient()
 }
@@ -146,16 +146,22 @@ func startWatchers() {
 	go watchNetworks(networkCollection)
 }
 
-func waitUntilReady() {
+func waitUntilReady(mode string) {
 	runtime := Containers.GetContainerRuntime()
-	cont, err := runtime.ReadContainer("agogos-mongo-primary")
-	for !strings.Contains(cont.Status, "running") {
-		if err != nil {
-			panic("Could not set up database")
-		}
+	var lastErr error
+	for i := 0; i < 20; i++ {
+		cont, err := runtime.ReadContainer(fmt.Sprintf("agogos-mongo-%s", mode))
 		time.Sleep(2 * time.Second)
-		cont, err = runtime.ReadContainer("agogos-mongo-primary")
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if strings.Contains(cont.Status, "running") {
+			return
+		}
+		cont, err = runtime.ReadContainer(fmt.Sprintf("agogos-mongo-%s", mode))
 	}
+	panic("Could not check container status after 20 attempts. Quitting. Last error was: " + lastErr.Error())
 }
 
 func setupClient() *mgo.Session {

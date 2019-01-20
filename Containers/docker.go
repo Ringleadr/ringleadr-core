@@ -74,7 +74,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 			return errors.New("Error creating port: " + err.Error())
 		}
 		ports[p] = struct{}{}
-		portBind[p] = []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: k}}
+		if !strings.Contains(k, ":") {
+			portBind[p] = []nat.PortBinding{{HostIP: "127.0.0.1", HostPort: k}}
+		} else {
+			index := strings.Index(k, ":")
+			portBind[p] = []nat.PortBinding{{HostIP: k[:index], HostPort: k[index+1:]}}
+		}
 	}
 
 	mounts := []mount.Mount{}
