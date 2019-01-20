@@ -128,3 +128,41 @@ func GetNetwork(name string) (*Datatypes.Network, error) {
 	}
 	return network, err
 }
+
+func InsertNode(node *Datatypes.Node) error {
+	err := nodesCollection.Insert(node)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteNode(name string) error {
+	//TODO returns empty error when it can't delete the required item
+	err := nodesCollection.Remove(bson.M{"name": name})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetAllNodes() ([]Datatypes.Node, error) {
+	var nodes []Datatypes.Node
+	err := nodesCollection.Find(bson.M{}).All(&nodes)
+	if err != nil {
+		return nil, err
+	}
+	return nodes, nil
+}
+
+func GetNode(name string) (*Datatypes.Node, error) {
+	node := &Datatypes.Node{}
+	err := nodesCollection.Find(bson.M{"name": name}).One(node)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return node, err
+}

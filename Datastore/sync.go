@@ -6,28 +6,35 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Logger"
+	"github.com/GodlikePenguin/agogos-host/Utils"
 	"log"
 	"strings"
 	"time"
 )
 
-func startSync() {
+func startSync(mode string, address string) {
 	go func() {
 		runtime := Containers.GetContainerRuntime()
 		for {
-			syncTick(runtime)
+			syncTick(runtime, mode, address)
 			time.Sleep(10 * time.Second)
 		}
 	}()
 }
 
-func syncTick(runtime Containers.ContainerRuntime) {
+func syncTick(runtime Containers.ContainerRuntime, mode string, address string) {
 	//TODO remove old error messages if they are no longer valid
 	//Check datastore is up
-	cont, err := runtime.ReadContainer("agogos-mongo-primary")
-	if !(err == nil && strings.Contains(cont.Status, "running")) {
-		startDatastoreContainer(runtime)
-		//might need to restart watchers here
+	if mode == "Primary" {
+		cont, err := runtime.ReadContainer("agogos-mongo-primary")
+		if !(err == nil && strings.Contains(cont.Status, "running")) {
+			startDatastoreContainer(runtime)
+		}
+	} else if mode == "Secondary" {
+		cont, err := runtime.ReadContainer("agogos-mongo-secondary")
+		if !(err == nil && strings.Contains(cont.Status, "running")) {
+			startSecondaryDatastoreContainer(runtime, address)
+		}
 	}
 	//Get all items in the Applications database
 	apps, err := GetAllApps()
@@ -70,7 +77,7 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 						if err != nil {
 							Logger.ErrPrintf("Error starting component %s in app %s: %s", comp.Name, app.Name, err.Error())
 							formatError := fmt.Sprintf("Error starting component %s: %s", comp.Name, err.Error())
-							if !stringArrayContains(app.Messages, formatError) {
+							if !Utils.StringArrayContains(app.Messages, formatError) {
 								app.Messages = append(app.Messages, formatError)
 								shouldSave = true
 							}
@@ -91,15 +98,6 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 			}
 		}
 	}
-}
-
-func stringArrayContains(arr []string, element string) bool {
-	for _, a := range arr {
-		if a == element {
-			return true
-		}
-	}
-	return false
 }
 
 func createMissingAppNetworks(app Datatypes.Application, runtime Containers.ContainerRuntime) {
