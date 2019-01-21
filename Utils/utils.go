@@ -2,6 +2,7 @@ package Utils
 
 import (
 	"log"
+	"math"
 	"net"
 )
 
@@ -25,4 +26,16 @@ func StringArrayContains(arr []string, element string) bool {
 		}
 	}
 	return false
+}
+
+func GetMinFromStringIntMap(m map[string]int) string {
+	minInt := math.MaxInt64
+	minS := ""
+	for k, v := range m {
+		if v < minInt {
+			minInt = v
+			minS = k
+		}
+	}
+	return minS
 }

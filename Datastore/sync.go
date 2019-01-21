@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Utils"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,13 +18,19 @@ func startSync(mode string, address string) {
 		runtime := Containers.GetContainerRuntime()
 		for {
 			syncTick(runtime, mode, address)
-			time.Sleep(10 * time.Second)
+			time.Sleep(7 * time.Second)
 		}
 	}()
 }
 
 func syncTick(runtime Containers.ContainerRuntime, mode string, address string) {
 	//TODO remove old error messages if they are no longer valid
+	hostname, err := os.Hostname()
+	if err != nil {
+		//skip this go and try again next time
+		Logger.ErrPrintf("Error getting hostname in sync thread: %s", err.Error())
+		return
+	}
 	//Check datastore is up
 	if mode == "Primary" {
 		cont, err := runtime.ReadContainer("agogos-mongo-primary")
@@ -55,14 +62,22 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
 	}
 
+	if mode == "Primary" {
+		distribution := getAppDistribution(apps)
+		assignAppsWithNoNodes(apps, distribution)
+	}
+
 	createMissingNetworks(networks, runtime)
-	createMissingComponents(apps, containers, runtime)
-	deleteOrphanedContainers(apps, containers, runtime)
+	createMissingComponents(apps, containers, runtime, hostname)
+	deleteOrphanedContainers(apps, containers, runtime, hostname)
 
 }
-func createMissingComponents(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime) {
+func createMissingComponents(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime, hostname string) {
 	//Look for components without matching containers (create missing)
 	for _, app := range apps {
+		if app.Node != hostname && app.Node != "*" {
+			continue
+		}
 		shouldSave := false
 		for i := 0; i < app.Copies; i++ {
 			for _, comp := range app.Components {
@@ -153,7 +168,7 @@ func lookForMatchingContainer(containerName string, conts []*Containers.Containe
 	return nil
 }
 
-func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime) {
+func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime, hostname string) {
 	//Look for containers without matching components (and delete)
 	for _, cont := range containers {
 		//If the container is in created mode (and not running) then let's get rid of it.
@@ -166,7 +181,7 @@ func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Contai
 			}(cont.Name)
 		}
 		//If the app which owns the container no longer exists then purge
-		if !lookForMatchingApplication(cont.Labels["agogos.owned.by"], apps) {
+		if !lookForMatchingApplication(cont.Labels["agogos.owned.by"], apps, hostname) {
 			go func(name string) {
 				err := runtime.DeleteContainer(name)
 				if err != nil {
@@ -178,11 +193,11 @@ func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Contai
 	}
 }
 
-func lookForMatchingApplication(applicationName string, apps []Datatypes.Application) bool {
+func lookForMatchingApplication(applicationName string, apps []Datatypes.Application, hostname string) bool {
 	canonicalName := applicationName[:strings.LastIndex(applicationName, "-")]
 	found := false
 	for _, app := range apps {
-		if app.Name == canonicalName {
+		if app.Name == canonicalName && (app.Node == hostname || app.Node == "*") {
 			found = true
 			break
 		}
@@ -205,6 +220,40 @@ func createMissingNetworks(networks []Datatypes.Network, runtime Containers.Cont
 					Logger.ErrPrintf("Error creating network %s: %s", name, err.Error())
 				}
 			}(net.Name)
+		}
+	}
+}
+
+func getAppDistribution(apps []Datatypes.Application) map[string]int {
+	nodes, err := GetAllNodes()
+	if err != nil {
+		Logger.ErrPrintf("Error getting nodes in sync thread: %s", err.Error())
+	}
+	results := make(map[string]int)
+	for _, node := range nodes {
+		results[node.Name] = 0
+	}
+	for _, app := range apps {
+		if app.Node != "" && app.Node != "*" {
+			results[app.Node] = results[app.Node] + 1
+		}
+	}
+	return results
+}
+
+func assignAppsWithNoNodes(apps []Datatypes.Application, distribution map[string]int) {
+	for _, app := range apps {
+		if app.Node != "" {
+			continue
+		}
+		selectedNode := Utils.GetMinFromStringIntMap(distribution)
+		if selectedNode != "" {
+			app.Node = selectedNode
+			distribution[selectedNode] = distribution[selectedNode] + 1
+			err := UpdateApp(&app)
+			if err != nil {
+				Logger.ErrPrintf("Error assigning node to app: %s", err.Error())
+			}
 		}
 	}
 }
