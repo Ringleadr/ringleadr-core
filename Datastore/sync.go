@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Utils"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -63,8 +64,16 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 	}
 
 	if mode == "Primary" {
-		distribution := getAppDistribution(apps)
-		assignAppsWithNoNodes(apps, distribution)
+		nodes, err := GetAllNodes()
+		if err != nil {
+			Logger.ErrPrintf("Error fetching nodes from sync thread: %s", err.Error())
+		}
+		//This is by far the slowest part of all the sync thread due to http timeouts on failure.
+		// Consider calling this method less often?
+		checkForInactiveNodes(nodes, hostname)
+		distribution := getAppDistribution(apps, nodes)
+		assignAppsWithNoNodes(&apps, distribution)
+		displayErrorForAppsOnInactiveNodes(apps, nodes)
 	}
 
 	createMissingNetworks(networks, runtime)
@@ -224,25 +233,29 @@ func createMissingNetworks(networks []Datatypes.Network, runtime Containers.Cont
 	}
 }
 
-func getAppDistribution(apps []Datatypes.Application) map[string]int {
-	nodes, err := GetAllNodes()
-	if err != nil {
-		Logger.ErrPrintf("Error getting nodes in sync thread: %s", err.Error())
-	}
+func getAppDistribution(apps []Datatypes.Application, nodes []Datatypes.Node) map[string]int {
 	results := make(map[string]int)
 	for _, node := range nodes {
-		results[node.Name] = 0
+		if node.Active {
+			results[node.Name] = 0
+		}
 	}
 	for _, app := range apps {
 		if app.Node != "" && app.Node != "*" {
 			results[app.Node] = results[app.Node] + 1
 		}
 	}
+	for _, node := range nodes {
+		if !node.Active {
+			//Remove any inactive nodes from the results so we don't schedule a container there
+			delete(results, node.Name)
+		}
+	}
 	return results
 }
 
-func assignAppsWithNoNodes(apps []Datatypes.Application, distribution map[string]int) {
-	for _, app := range apps {
+func assignAppsWithNoNodes(apps *[]Datatypes.Application, distribution map[string]int) {
+	for _, app := range *apps {
 		if app.Node != "" {
 			continue
 		}
@@ -253,6 +266,50 @@ func assignAppsWithNoNodes(apps []Datatypes.Application, distribution map[string
 			err := UpdateApp(&app)
 			if err != nil {
 				Logger.ErrPrintf("Error assigning node to app: %s", err.Error())
+			}
+		}
+	}
+}
+
+func checkForInactiveNodes(nodes []Datatypes.Node, hostname string) {
+	for _, node := range nodes {
+		if node.Name == hostname {
+			continue
+		}
+		oldStatus := node.Active
+		resp, err := http.Get(fmt.Sprintf("http://%s:14440/ping", node.Address))
+		if err != nil || resp.StatusCode != http.StatusOK {
+			node.Active = false
+		} else {
+			node.Active = true
+		}
+		if oldStatus != node.Active {
+			err := UpdateNode(&node)
+			if err != nil {
+				Logger.ErrPrintf("Error updating node status in sync thread: %s", err.Error())
+			}
+		}
+	}
+}
+
+func displayErrorForAppsOnInactiveNodes(apps []Datatypes.Application, nodes []Datatypes.Node) {
+	for _, app := range apps {
+		shouldSave := false
+		for _, node := range nodes {
+			if app.Node == node.Name {
+				if !node.Active {
+					formatError := fmt.Sprintf("Application is scheduled on inactive node: %s", node.Name)
+					if !Utils.StringArrayContains(app.Messages, formatError) {
+						app.Messages = append(app.Messages, formatError)
+						shouldSave = true
+					}
+				}
+			}
+		}
+		if shouldSave {
+			err := UpdateApp(&app)
+			if err != nil {
+				Logger.ErrPrintf("Error saving inactive node message to application: %s", err.Error())
 			}
 		}
 	}

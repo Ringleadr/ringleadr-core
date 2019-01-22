@@ -48,7 +48,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 
 			//Sleep to give time for db to start
 			//TODO do this is a more programatic way
-			time.Sleep(1 * time.Minute)
+			time.Sleep(30 * time.Second)
 		} else {
 			Logger.Println("Using existing database")
 		}
@@ -188,7 +188,7 @@ func addThisNode() {
 		panic("Could not check node collection on startup")
 	}
 	if node == nil {
-		err = InsertNode(&Datatypes.Node{Name: name, Address: address.String()})
+		err = InsertNode(&Datatypes.Node{Name: name, Address: address.String(), Active: true})
 		if err != nil {
 			panic("Could not set up datastore with this nodes information: " + err.Error())
 		}

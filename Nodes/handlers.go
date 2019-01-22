@@ -30,11 +30,16 @@ func Register(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "Could not get name from register request")
 		return
 	}
-	err = Datastore.InsertNode(&Datatypes.Node{Name: req.Name, Address: address})
-	if err != nil {
-		Logger.ErrPrintln("Error registering new node: ", err)
-		ctx.String(http.StatusInternalServerError, "Error inserting new node: "+err.Error())
-		return
+	if node, err := Datastore.GetNode(req.Name); err == nil && node == nil {
+		err = Datastore.InsertNode(&Datatypes.Node{Name: req.Name, Address: address})
+		if err != nil {
+			Logger.ErrPrintln("Error registering new node: ", err)
+			ctx.String(http.StatusInternalServerError, "Error inserting new node: "+err.Error())
+			return
+		}
+	} else if err != nil {
+		Logger.ErrPrintf("Error checking for existing node entry: %s", err.Error())
+		ctx.String(http.StatusInternalServerError, "Error checking for existing node entry: %s"+err.Error())
 	}
 	ctx.JSON(http.StatusOK, nil)
 }

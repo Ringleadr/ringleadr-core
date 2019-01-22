@@ -166,3 +166,11 @@ func GetNode(name string) (*Datatypes.Node, error) {
 	}
 	return node, err
 }
+
+func UpdateNode(node *Datatypes.Node) error {
+	err := nodesCollection.Update(bson.M{"name": node.Name}, node)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -287,17 +288,31 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 	}
 	stringPorts := make(map[string]string)
 	for _, port := range dockerCont.Ports {
-		stringPorts[string(port.PublicPort)] = string(port.PrivatePort)
+		stringPorts[strconv.Itoa(int(port.PublicPort))] = strconv.Itoa(int(port.PrivatePort))
+	}
+
+	var nets []string
+	for name := range dockerCont.NetworkSettings.Networks {
+		if name != "bridge" {
+			nets = append(nets, name)
+		}
+	}
+
+	var storage []StorageMount
+	for _, contMount := range dockerCont.Mounts {
+		storage = append(storage, StorageMount{Name: contMount.Name, MountPath: contMount.Destination})
 	}
 
 	//TODO try to get env here
 	cont := &Container{
-		ID:     dockerCont.ID,
-		Image:  dockerCont.Image,
-		Name:   dockerCont.Names[0],
-		Labels: dockerCont.Labels,
-		Status: fmt.Sprintf("%s: %s", dockerCont.State, dockerCont.Status),
-		Ports:  stringPorts,
+		ID:       dockerCont.ID,
+		Image:    dockerCont.Image,
+		Name:     dockerCont.Names[0],
+		Labels:   dockerCont.Labels,
+		Status:   fmt.Sprintf("%s: %s", dockerCont.State, dockerCont.Status),
+		Ports:    stringPorts,
+		Networks: nets,
+		Storage:  storage,
 	}
 	return cont, nil
 }
