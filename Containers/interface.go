@@ -13,6 +13,11 @@ type Container struct {
 	Storage  []StorageMount    `json:"storage"`
 	Networks []string          `json:"networks"`
 	Alias    string            `json:"alias"`
+	Stats    Stats             `json:"stats"`
+}
+
+type Stats struct {
+	CpuUsage float64 `json:"cpu_usage"`
 }
 
 type StorageMount struct {

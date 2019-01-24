@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9d61855055b42ed58fbf75b563e3755dc61bf3086b6f861c356fe0ddb0a65d82"
+  digest = "1:0888045a32b8d7611776fc1de5b371a867b706ef13664089d9f311947183e252"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "163c83593136bd8a218a25eac8223c3dd8267c91"
+  revision = "dea9a7da0ebd5b36af603d6b2696105cb062edcb"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -53,7 +53,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "8d7889e51013e80c05a69688e66d09168812b83b"
+  revision = "de86ba27fbea7a0876066d14220a22fdb1fd8295"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -77,11 +77,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:36fe9527deed01d2a317617e59304eb2c4ce9f8a24115bcc5c2e37b3aee5bae4"
+  digest = "1:38f00d85208f9f51e51063b0b90687d72f3ad61a7b6135d3ab6cb21e7b68dff2"
   name = "github.com/gin-contrib/sse"
   packages = ["."]
   pruneopts = "UT"
-  revision = "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae"
+  revision = "61b50c2ef482d0f2c68fa55a1ef570ee5032b0d8"
 
 [[projects]]
   digest = "1:d5083934eb25e45d17f72ffa86cae3814f4a9d6c073c4f16b64147169b245606"
@@ -206,14 +206,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9d6fee48d0bab077ed9cc08f69e902615f02b3e30f945334bdf902abb9e2af7c"
+  digest = "1:bb644db32f5bc1e327a0f748ec871edc4dc46f19b4fbbc15bfd95b1460646537"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "054c452bb702e465e95ce8e7a3d9a6cf0cd1188d"
+  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"

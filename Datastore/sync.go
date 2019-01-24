@@ -19,7 +19,7 @@ func startSync(mode string, address string) {
 		runtime := Containers.GetContainerRuntime()
 		for {
 			syncTick(runtime, mode, address)
-			time.Sleep(7 * time.Second)
+			time.Sleep(1 * time.Second)
 		}
 	}()
 }
@@ -49,18 +49,21 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 	if err != nil {
 		log.Printf("error getting Applications from datastore in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
+		return
 	}
 
 	containers, err := runtime.ReadAllContainers()
 	if err != nil {
 		log.Printf("error getting containers from runtime in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
+		return
 	}
 
 	networks, err := GetAllNetworks()
 	if err != nil {
 		log.Printf("error getting networks from datastore in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
+		return
 	}
 
 	if mode == "Primary" {
@@ -90,6 +93,7 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 		shouldSave := false
 		for i := 0; i < app.Copies; i++ {
 			for _, comp := range app.Components {
+				var compCPUTotal float64
 				if comp.Name == "" {
 					comp.Name = comp.Image
 				}
@@ -111,14 +115,19 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							comp.Status = matchingCont.Status
 							shouldSave = true
 						}
+						compCPUTotal += matchingCont.Stats.CpuUsage
 					}
+				}
+				if comp.ScaleThreshold != 0 && compCPUTotal/float64(comp.Replicas) > float64(comp.ScaleThreshold) {
+					comp.Replicas = comp.Replicas + 1
+					shouldSave = true
 				}
 			}
 		}
 		if shouldSave {
 			err := UpdateApp(&app)
 			if err != nil {
-				Logger.ErrPrintln("Error updating %s in application datastore: %s", app.Name, err.Error())
+				Logger.ErrPrintf("Error updating %s in application datastore: %s", app.Name, err.Error())
 			}
 		}
 	}
@@ -181,7 +190,7 @@ func deleteOrphanedContainers(apps []Datatypes.Application, containers []*Contai
 	//Look for containers without matching components (and delete)
 	for _, cont := range containers {
 		//If the container is in created mode (and not running) then let's get rid of it.
-		if cont.Status == "created: Created" {
+		if cont.Status == "created" {
 			go func(name string) {
 				err := runtime.DeleteContainer(name)
 				if err != nil {

@@ -18,7 +18,6 @@ func InitLogger(background bool) {
 	//TODO change to file based logging if we're in background mode
 	logger = log.New(os.Stdout, "[AGOGOS] ", logFlag)
 	errLogger = log.New(os.Stderr, "[AGOGOS] ", logFlag)
-	logger.Println("Logging in background mode:", background)
 }
 
 func getCallerLine() string {

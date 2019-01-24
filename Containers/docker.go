@@ -3,6 +3,7 @@ package Containers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/docker/docker/api/types"
@@ -283,6 +284,10 @@ func dockerContainersToInterface(containers ...types.Container) ([]*Container, e
 }
 
 func dockerContainerToInterface(dockerCont types.Container) (*Container, error) {
+	stats, err := getStatsForContainer(dockerCont)
+	if err != nil {
+		return nil, err
+	}
 	if len(dockerCont.Names) < 0 {
 		return nil, errors.New(fmt.Sprintf("Container %s has no name", dockerCont.ID))
 	}
@@ -309,10 +314,49 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 		Image:    dockerCont.Image,
 		Name:     dockerCont.Names[0],
 		Labels:   dockerCont.Labels,
-		Status:   fmt.Sprintf("%s: %s", dockerCont.State, dockerCont.Status),
+		Status:   dockerCont.State,
 		Ports:    stringPorts,
 		Networks: nets,
 		Storage:  storage,
+		Stats:    *stats,
 	}
 	return cont, nil
+}
+
+func getStatsForContainer(dockerCont types.Container) (*Stats, error) {
+	cli := GetDockerClient()
+
+	resp, err := cli.ContainerStats(context.Background(), dockerCont.ID, false)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	dec := json.NewDecoder(resp.Body)
+	var v *types.StatsJSON
+	if err := dec.Decode(&v); err != nil {
+		return nil, err
+	}
+	previousCPU := v.PreCPUStats.CPUUsage.TotalUsage
+	previousSystem := v.PreCPUStats.SystemUsage
+	cpuPercent := calculateCPUPercentUnix(previousCPU, previousSystem, v)
+	return &Stats{
+		CpuUsage: cpuPercent,
+	}, nil
+}
+
+func calculateCPUPercentUnix(previousCPU, previousSystem uint64, v *types.StatsJSON) float64 {
+	var (
+		cpuPercent = 0.0
+		// calculate the change for the cpu usage of the container in between readings
+		cpuDelta = float64(v.CPUStats.CPUUsage.TotalUsage) - float64(previousCPU)
+		// calculate the change for the entire system between readings
+		systemDelta = float64(v.CPUStats.SystemUsage) - float64(previousSystem)
+	)
+
+	if systemDelta > 0.0 && cpuDelta > 0.0 {
+		cpuPercent = (cpuDelta / systemDelta) * float64(len(v.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+	}
+	return cpuPercent
 }
