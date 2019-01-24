@@ -10,6 +10,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Networks"
 	"github.com/GodlikePenguin/agogos-host/Nodes"
 	"github.com/GodlikePenguin/agogos-host/Storage"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
 	"math"
@@ -69,6 +70,7 @@ func main() {
 
 	Datastore.SetupDatastore(agogosMode, *connectAddress)
 	r := setupRouter()
+	r.Use(cors.Default())
 	for path, handler := range getMethods {
 		r.GET(path, handler)
 	}

@@ -76,6 +76,14 @@
   version = "v0.3.3"
 
 [[projects]]
+  digest = "1:2b59aca2665ff804f6606c8829eaee133ddd3aefbc841014660d961b0034f888"
+  name = "github.com/gin-contrib/cors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cf4846e6a636a76237a28d9286f163c132e841bc"
+  version = "v1.2"
+
+[[projects]]
   branch = "master"
   digest = "1:38f00d85208f9f51e51063b0b90687d72f3ad61a7b6135d3ab6cb21e7b68dff2"
   name = "github.com/gin-contrib/sse"
@@ -244,6 +252,7 @@
     "github.com/docker/docker/api/types/volume",
     "github.com/docker/docker/client",
     "github.com/docker/go-connections/nat",
+    "github.com/gin-contrib/cors",
     "github.com/gin-gonic/gin",
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
