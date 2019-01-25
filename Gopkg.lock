@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:0888045a32b8d7611776fc1de5b371a867b706ef13664089d9f311947183e252"
+  digest = "1:74d8e73b157205d4c220d3ac95802ac2f8462d0cb774bd31f3e0f82d91bec4c5"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "dea9a7da0ebd5b36af603d6b2696105cb062edcb"
+  revision = "066429985e3d049b7de3a19ea82be1e01c9b8e00"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -53,7 +53,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "de86ba27fbea7a0876066d14220a22fdb1fd8295"
+  revision = "27c71789335d26017f7c748748bf679cf4888fba"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -89,7 +89,7 @@
   name = "github.com/gin-contrib/sse"
   packages = ["."]
   pruneopts = "UT"
-  revision = "61b50c2ef482d0f2c68fa55a1ef570ee5032b0d8"
+  revision = "a7658810eb745c2f22927282dea478278103a897"
 
 [[projects]]
   digest = "1:d5083934eb25e45d17f72ffa86cae3814f4a9d6c073c4f16b64147169b245606"
@@ -210,7 +210,7 @@
     "proxy",
   ]
   pruneopts = "UT"
-  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "master"

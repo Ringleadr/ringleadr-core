@@ -41,6 +41,16 @@ func createApplication(app *Datatypes.Application) error {
 		if comp.Replicas < 1 {
 			comp.Replicas = 1
 		}
+
+		if comp.ScaleThreshold != 0 {
+			if comp.ScaleMin < 1 {
+				comp.ScaleMin = 1
+			}
+
+			if comp.ScaleMax < 1 {
+				comp.ScaleMax = 10
+			}
+		}
 	}
 
 	appExists, _ := getAppFromName(app.Name)

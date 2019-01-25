@@ -8,6 +8,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Utils"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strings"
@@ -118,9 +119,18 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 						compCPUTotal += matchingCont.Stats.CpuUsage
 					}
 				}
-				if comp.ScaleThreshold != 0 && compCPUTotal/float64(comp.Replicas) > float64(comp.ScaleThreshold) {
-					comp.Replicas = comp.Replicas + 1
-					shouldSave = true
+				if comp.ScaleThreshold != 0 {
+					desiredReplicas := math.Ceil(float64(comp.Replicas) * ((compCPUTotal / float64(comp.Replicas)) / float64(comp.ScaleThreshold)))
+					if int(desiredReplicas) > comp.ScaleMax {
+						desiredReplicas = float64(comp.ScaleMax)
+					} else if int(desiredReplicas) < comp.ScaleMin {
+						desiredReplicas = float64(comp.ScaleMin)
+					}
+					if int(desiredReplicas) != comp.Replicas {
+						comp.Replicas = int(desiredReplicas)
+						shouldSave = true
+					}
+
 				}
 			}
 		}
