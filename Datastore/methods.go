@@ -185,18 +185,23 @@ type ComponentEntry struct {
 }
 
 type CpuUsage struct {
-	Percent   float64 `json:"percent" bson:"percent"`
-	TimeStamp int64   `json:"time_stamp" bson:"time_stamp"`
-	Copy      int     `json:"copy" bson:"copy"`
-	Replica   int     `json:"replica" bson:"replica"`
+	TotalPercent   float64 `json:"total_percent" bson:"total_percent"`
+	AveragePercent float64 `json:"average_percent" bson:"average_percent"`
+	TimeStamp      int64   `json:"time_stamp" bson:"time_stamp"`
 }
 
-func UpdateOrInsertComponent(appName string, compName string, copy int, replica int, stats Containers.Stats, timestamp int64) error {
-	entity := ComponentEntry{AppName: appName, ComponentName: compName}
-	usage := CpuUsage{Percent: stats.CpuUsage, TimeStamp: timestamp, Copy: copy, Replica: replica}
+func UpdateOrInsertComponent(appName string, compName string, stats []Containers.Stats, timestamp int64) error {
+	if len(stats) == 0 {
+		return nil
+	}
+	var cpuTotal float64
+	for _, stat := range stats {
+		cpuTotal += stat.CpuUsage
+	}
+	usage := CpuUsage{TotalPercent: cpuTotal, AveragePercent: cpuTotal / float64(len(stats)), TimeStamp: timestamp}
 	_, err := componentCollection.Upsert(bson.M{
-		"app_name":       entity.AppName,
-		"component_name": entity.ComponentName,
+		"app_name":       appName,
+		"component_name": compName,
 	}, bson.M{
 		"$push": bson.M{
 			"cpu_usage": usage,

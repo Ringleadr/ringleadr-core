@@ -92,6 +92,7 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 		if app.Node != hostname && app.Node != "*" {
 			continue
 		}
+		totalCompStats := make(map[string][]Containers.Stats)
 		shouldSave := false
 		for i := 0; i < app.Copies; i++ {
 			for _, comp := range app.Components {
@@ -118,13 +119,7 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							shouldSave = true
 						}
 						compCPUTotal += matchingCont.Stats.CpuUsage
-						//Insert the stats of this container to the DB
-						go func(appName string, compName string, copies int, replicas int, stats Containers.Stats, containerName string) {
-							err := UpdateOrInsertComponent(appName, compName, copies, replicas, stats, timeStamp)
-							if err != nil {
-								Logger.ErrPrintf("Error inserting stats for %s: %s", containerName, err.Error)
-							}
-						}(app.Name, comp.Name, i, j, matchingCont.Stats, matchingCont.Name)
+						totalCompStats[comp.Name] = append(totalCompStats[comp.Name], matchingCont.Stats)
 					}
 				}
 				if comp.ScaleThreshold != 0 {
@@ -147,6 +142,15 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 			if err != nil {
 				Logger.ErrPrintf("Error updating %s in application datastore: %s", app.Name, err.Error())
 			}
+		}
+		for _, comp := range app.Components {
+			//Insert the stats of this container to the DB
+			go func(appName string, compName string, stats []Containers.Stats) {
+				err := UpdateOrInsertComponent(appName, compName, stats, timeStamp)
+				if err != nil {
+					Logger.ErrPrintf("Error inserting stats for %s: %s", compName, err.Error)
+				}
+			}(app.Name, comp.Name, totalCompStats[comp.Name])
 		}
 	}
 }
