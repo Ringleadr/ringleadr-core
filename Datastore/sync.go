@@ -87,6 +87,7 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 }
 func createMissingComponents(apps []Datatypes.Application, containers []*Containers.Container, runtime Containers.ContainerRuntime, hostname string) {
 	//Look for components without matching containers (create missing)
+	timeStamp := time.Now().Unix()
 	for _, app := range apps {
 		if app.Node != hostname && app.Node != "*" {
 			continue
@@ -117,6 +118,13 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							shouldSave = true
 						}
 						compCPUTotal += matchingCont.Stats.CpuUsage
+						//Insert the stats of this container to the DB
+						go func(appName string, compName string, copies int, replicas int, stats Containers.Stats, containerName string) {
+							err := UpdateOrInsertComponent(appName, compName, copies, replicas, stats, timeStamp)
+							if err != nil {
+								Logger.ErrPrintf("Error inserting stats for %s: %s", containerName, err.Error)
+							}
+						}(app.Name, comp.Name, i, j, matchingCont.Stats, matchingCont.Name)
 					}
 				}
 				if comp.ScaleThreshold != 0 {

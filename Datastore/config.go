@@ -16,6 +16,7 @@ var (
 	mongoClient           *mgo.Session
 	agogosDB              *mgo.Database
 	applicationCollection *mgo.Collection
+	componentCollection   *mgo.Collection
 	storageCollection     *mgo.Collection
 	networkCollection     *mgo.Collection
 	nodesCollection       *mgo.Collection
@@ -135,6 +136,7 @@ func setupTables() {
 	}
 
 	applicationCollection = agogosDB.C("applications")
+	componentCollection = agogosDB.C("components")
 	storageCollection = agogosDB.C("storage")
 	networkCollection = agogosDB.C("networks")
 	nodesCollection = agogosDB.C("nodes")

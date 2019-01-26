@@ -26,11 +26,12 @@ var getMethods = map[string]func(ctx *gin.Context){
 			"message": "pong",
 		})
 	},
-	"/applications":      Applications.GetApplications,
-	"/application/:name": Applications.GetApplication,
-	"/storage":           Storage.ListStorage,
-	"/networks":          Networks.ListNetworks,
-	"/nodes":             Nodes.ListNodes,
+	"/applications":                Applications.GetApplications,
+	"/application/:name":           Applications.GetApplication,
+	"/application/:name/:compName": Applications.GetApplicationComponentInformation,
+	"/storage":                     Storage.ListStorage,
+	"/networks":                    Networks.ListNetworks,
+	"/nodes":                       Nodes.ListNodes,
 }
 
 var postMethods = map[string]func(ctx *gin.Context){

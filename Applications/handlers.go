@@ -133,6 +133,12 @@ func DeleteApplication(ctx *gin.Context) {
 		ctx.String(code, err.Error())
 	}
 
+	err = Datastore.DeleteComponentsFor(name)
+	if err != nil {
+		//Not a crucial error so we won't return a non 200 code here, just log the error
+		Logger.ErrPrintf("Could not remove stats for %s: %s", name, err.Error())
+	}
+
 	ctx.JSON(http.StatusOK, nil)
 }
 
@@ -165,4 +171,15 @@ func deleteApplication(name string) (int, error) {
 		Logger.ErrPrintf("Error deleting implicit network %s: %s", app.Name, err.Error())
 	}()
 	return http.StatusOK, nil
+}
+
+func GetApplicationComponentInformation(ctx *gin.Context) {
+	appName := ctx.Param("name")
+	compName := ctx.Param("compName")
+	comp, err := Datastore.GetComponent(appName, compName)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, comp)
 }

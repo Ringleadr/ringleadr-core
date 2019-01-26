@@ -2,6 +2,7 @@ package Datastore
 
 import (
 	"github.com/GodlikePenguin/agogos-datatypes"
+	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/globalsign/mgo/bson"
 )
 
@@ -169,6 +170,61 @@ func GetNode(name string) (*Datatypes.Node, error) {
 
 func UpdateNode(node *Datatypes.Node) error {
 	err := nodesCollection.Update(bson.M{"name": node.Name}, node)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// FIELDS FOR COMPONENT STATS
+
+type ComponentEntry struct {
+	AppName       string      `json:"app_name" bson:"app_name"`
+	ComponentName string      `json:"component_name" bson:"component_name"`
+	CpuUsage      []*CpuUsage `json:"cpu_usage" bson:"cpu_usage"`
+}
+
+type CpuUsage struct {
+	Percent   float64 `json:"percent" bson:"percent"`
+	TimeStamp int64   `json:"time_stamp" bson:"time_stamp"`
+	Copy      int     `json:"copy" bson:"copy"`
+	Replica   int     `json:"replica" bson:"replica"`
+}
+
+func UpdateOrInsertComponent(appName string, compName string, copy int, replica int, stats Containers.Stats, timestamp int64) error {
+	entity := ComponentEntry{AppName: appName, ComponentName: compName}
+	usage := CpuUsage{Percent: stats.CpuUsage, TimeStamp: timestamp, Copy: copy, Replica: replica}
+	_, err := componentCollection.Upsert(bson.M{
+		"app_name":       entity.AppName,
+		"component_name": entity.ComponentName,
+	}, bson.M{
+		"$push": bson.M{
+			"cpu_usage": usage,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetComponent(appName string, compName string) (*ComponentEntry, error) {
+	comp := &ComponentEntry{}
+	err := componentCollection.Find(bson.M{
+		"app_name":       appName,
+		"component_name": compName,
+	}).One(comp)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return comp, err
+}
+
+func DeleteComponentsFor(appName string) error {
+	err := componentCollection.Remove(bson.M{"app_name": appName})
 	if err != nil {
 		return err
 	}
