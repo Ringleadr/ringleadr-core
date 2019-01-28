@@ -9,6 +9,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Networks"
 	"github.com/GodlikePenguin/agogos-host/Nodes"
+	"github.com/GodlikePenguin/agogos-host/Overview"
 	"github.com/GodlikePenguin/agogos-host/Storage"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,7 @@ var getMethods = map[string]func(ctx *gin.Context){
 			"message": "pong",
 		})
 	},
+	"/overview":                    Overview.GetOverview,
 	"/applications":                Applications.GetApplications,
 	"/application/:name":           Applications.GetApplication,
 	"/application/:name/:compName": Applications.GetApplicationComponentInformation,

@@ -235,3 +235,35 @@ func DeleteComponentsFor(appName string) error {
 	}
 	return nil
 }
+
+type Overview struct {
+	Applications int `json:"applications"`
+	Networks     int `json:"networks"`
+	Storage      int `json:"storage"`
+	Nodes        int `json:"nodes"`
+}
+
+func GetOverview() (*Overview, error) {
+	noApplications, err := applicationCollection.Count()
+	if err != nil {
+		return nil, err
+	}
+	noNetworks, err := networkCollection.Count()
+	if err != nil {
+		return nil, err
+	}
+	noStorage, err := storageCollection.Count()
+	if err != nil {
+		return nil, err
+	}
+	noNodes, err := nodesCollection.Count()
+	if err != nil {
+		return nil, err
+	}
+	return &Overview{
+		Applications: noApplications,
+		Networks:     noNetworks,
+		Storage:      noStorage,
+		Nodes:        noNodes,
+	}, nil
+}
