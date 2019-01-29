@@ -73,7 +73,6 @@ func main() {
 
 	Datastore.SetupDatastore(agogosMode, *connectAddress)
 	r := setupRouter()
-	r.Use(cors.Default())
 	for path, handler := range getMethods {
 		r.GET(path, handler)
 	}
@@ -105,6 +104,11 @@ func main() {
 }
 
 func setupRouter() *gin.Engine {
-	gin.SetMode(gin.ReleaseMode)
-	return gin.Default()
+	//gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowMethods = append(corsConfig.AllowMethods, "DELETE")
+	corsConfig.AllowAllOrigins = true
+	r.Use(cors.New(corsConfig))
+	return r
 }
