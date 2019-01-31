@@ -1,4 +1,3 @@
-sudo: false
 language: go
 go:
 - "1.11"
@@ -6,9 +5,17 @@ git:
   depth: 1
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+  - echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+  - sudo apt-get update && sudo apt-get install yarn
 install:
+  - cd FrontEnd
+  - yarn install
+  - yarn build
+  - cd ..
   - dep ensure
 script:
+  - go generate
   - go test -v ./...
   - mkdir build
   - env GOOS=linux GOARCH=amd64 go build -o build/agogos-host-linux

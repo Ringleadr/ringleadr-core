@@ -1,0 +1,3 @@
+[submodule "FrontEnd"]
+	path = FrontEnd
+	url = https://github.com/GodlikePenguin/agogos-front-end.git

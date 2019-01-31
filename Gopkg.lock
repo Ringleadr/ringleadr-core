@@ -30,7 +30,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b4eba81058e3371f284b7d437a88030aa1b36bbceccbd416fe24af274bff9ec4"
+  digest = "1:431dda23b5bbc31a1152e9e57324b4c1f83d41698d9411049f1dbee6724c069a"
   name = "github.com/docker/docker"
   packages = [
     "api",
@@ -53,7 +53,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "27c71789335d26017f7c748748bf679cf4888fba"
+  revision = "393838ca5ec5bc4ddf2cc9a8051d36adfd31e6a1"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -194,34 +194,36 @@
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:03aa6e485e528acb119fb32901cf99582c380225fc7d5a02758e08b180cb56c3"
+  digest = "1:4887e9e89c80299aa520d718239809fdd2a47a9aa394909b169959bfbc424ddf"
   name = "github.com/ugorji/go"
   packages = ["codec"]
   pruneopts = "UT"
-  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
-  version = "v1.1.1"
+  revision = "8fd0f8d918c8f0b52d0af210a812ba882cc31a1e"
+  version = "v1.1.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:0a004b4ff5794b399b3556e68f0c436a57d5f7e437e740bb16c0b521ceb23fd7"
+  digest = "1:75af4e68bf8f5147137893d026464bf14c24f06d905a24a306139dcb85ed59a7"
   name = "golang.org/x/net"
   packages = [
     "internal/socks",
     "proxy",
+    "webdav",
+    "webdav/internal/xml",
   ]
   pruneopts = "UT"
   revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "master"
-  digest = "1:bb644db32f5bc1e327a0f748ec871edc4dc46f19b4fbbc15bfd95b1460646537"
+  digest = "1:7941e2f16c0833b438cbef7fccfe4f8346f9f7876b42b29717a75d7e8c4800cb"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "b90733256f2e882e81d52f9126de08df5615afd9"
+  revision = "aca44879d5644da7c5b8ec6a1115e9b6ea6c40d9"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"
@@ -257,6 +259,7 @@
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
     "github.com/pkg/errors",
+    "golang.org/x/net/webdav",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

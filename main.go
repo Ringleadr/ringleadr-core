@@ -1,3 +1,4 @@
+//go:generate fileb0x b0x.json
 package main
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Nodes"
 	"github.com/GodlikePenguin/agogos-host/Overview"
 	"github.com/GodlikePenguin/agogos-host/Storage"
+	"github.com/GodlikePenguin/agogos-host/static"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -98,13 +100,14 @@ func main() {
 			println(err.Error())
 		}
 	}
+	Logger.Println("Starting front end...")
+	go http.ListenAndServe(":14441", http.FileServer(static.HTTP))
 	Logger.Println("Ready to serve")
 	log.Fatal(r.Run(":14440"))
-
 }
 
 func setupRouter() *gin.Engine {
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowMethods = append(corsConfig.AllowMethods, "DELETE")
