@@ -10,6 +10,7 @@ before_install:
   - sudo apt-get update && sudo apt-get install yarn
   - nvm install 10
   - nvm use 10
+  - go get -u github.com/UnnoTed/fileb0x
 install:
   - cd FrontEnd
   - yarn install
