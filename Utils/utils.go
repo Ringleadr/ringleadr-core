@@ -39,3 +39,31 @@ func GetMinFromStringIntMap(m map[string]int) string {
 	}
 	return minS
 }
+
+func MapStringArrayStringEquals(a, b map[string][]string) bool {
+	for k, v := range a {
+		if v1, ok := b[k]; !ok || !StringArrayEquals(v, v1) {
+			return false
+		}
+	}
+	for k, v := range b {
+		if v1, ok := a[k]; !ok || !StringArrayEquals(v, v1) {
+			return false
+		}
+	}
+	return true
+}
+
+func StringArrayEquals(a, b []string) bool {
+	for _, i := range a {
+		if !StringArrayContains(b, i) {
+			return false
+		}
+	}
+	for _, i := range b {
+		if !StringArrayContains(a, i) {
+			return false
+		}
+	}
+	return true
+}

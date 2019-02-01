@@ -96,6 +96,8 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 		shouldSave := false
 		for i := 0; i < app.Copies; i++ {
 			for _, comp := range app.Components {
+				oldNetInfo := comp.NetworkInfo
+				comp.NetworkInfo = make(map[string][]string)
 				var compCPUTotal float64
 				if comp.Name == "" {
 					comp.Name = comp.Image
@@ -118,6 +120,9 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							comp.Status = matchingCont.Status
 							shouldSave = true
 						}
+						for _, net := range matchingCont.Networks {
+							comp.NetworkInfo[net.Name] = append(comp.NetworkInfo[net.Name], net.Addr)
+						}
 						compCPUTotal += matchingCont.Stats.CpuUsage
 						totalCompStats[comp.Name] = append(totalCompStats[comp.Name], matchingCont.Stats)
 					}
@@ -134,6 +139,9 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 						shouldSave = true
 					}
 
+				}
+				if !Utils.MapStringArrayStringEquals(oldNetInfo, comp.NetworkInfo) {
+					shouldSave = true
 				}
 			}
 		}

@@ -90,16 +90,24 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 			Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
 	}
 
+	hostConfig := &container.HostConfig{
+		PortBindings:  portBind,
+		Mounts:        mounts,
+		RestartPolicy: container.RestartPolicy{Name: "always"},
+	}
+	//EW HACKY
+	if UseProxy {
+		if cont.Name != "agogos-proxy" && cont.Name != "agogos-mongo-primary" && cont.Name != "agogos-mongo-secondary" {
+			hostConfig.Links = []string{"agogos-proxy"}
+		}
+	}
+
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        cont.Image,
 		Labels:       cont.Labels,
 		Env:          cont.Env,
 		ExposedPorts: ports,
-	}, &container.HostConfig{
-		PortBindings:  portBind,
-		Mounts:        mounts,
-		RestartPolicy: container.RestartPolicy{Name: "always"},
-	}, nil, cont.Name)
+	}, hostConfig, nil, cont.Name)
 	if err != nil {
 		return errors.New("Error Creating container: " + err.Error())
 	}
@@ -109,7 +117,7 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		if cont.Alias != "" {
 			settings.Aliases = []string{cont.Alias}
 		}
-		if err := cli.NetworkConnect(ctx, net, resp.ID, settings); err != nil {
+		if err := cli.NetworkConnect(ctx, net.Name, resp.ID, settings); err != nil {
 			return errors.New("error attaching container to network " + resp.ID + " " + err.Error())
 		}
 	}
@@ -296,11 +304,11 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 		stringPorts[strconv.Itoa(int(port.PublicPort))] = strconv.Itoa(int(port.PrivatePort))
 	}
 
-	var nets []string
-	for name := range dockerCont.NetworkSettings.Networks {
-		if name != "bridge" {
-			nets = append(nets, name)
-		}
+	var nets []Network
+	for name, details := range dockerCont.NetworkSettings.Networks {
+		//if name != "bridge" {
+		nets = append(nets, Network{name, details.IPAddress})
+		//}
 	}
 
 	var storage []StorageMount
@@ -316,9 +324,9 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 		Labels:   dockerCont.Labels,
 		Status:   dockerCont.State,
 		Ports:    stringPorts,
-		Networks: nets,
 		Storage:  storage,
 		Stats:    *stats,
+		Networks: nets,
 	}
 	return cont, nil
 }

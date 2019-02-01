@@ -65,8 +65,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 }
 
 func startDatastoreContainer(runtime Containers.ContainerRuntime) {
-	Logger.Println("Creating new datastore. This may take some time.")
-	//TODO give a docker volume
+	Logger.Println("Creating new datastore. This may take some time")
 
 	//Create a new data store
 	config := &Containers.Container{
@@ -91,7 +90,6 @@ func startDatastoreContainer(runtime Containers.ContainerRuntime) {
 
 func startSecondaryDatastoreContainer(runtime Containers.ContainerRuntime, address string) {
 	Logger.Println("Creating new datastore. This may take some time.")
-	//TODO give a docker volume
 
 	//Create a new data store
 	config := &Containers.Container{

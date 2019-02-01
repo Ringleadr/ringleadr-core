@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:74d8e73b157205d4c220d3ac95802ac2f8462d0cb774bd31f3e0f82d91bec4c5"
+  digest = "1:5d856074ca1e71983fd08236583f8e7cb902c85e19becc6ae36028f3b9ebff49"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "066429985e3d049b7de3a19ea82be1e01c9b8e00"
+  revision = "4213e7bf50ca6ca87e64fe620b523b5704af5c00"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -30,7 +30,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:431dda23b5bbc31a1152e9e57324b4c1f83d41698d9411049f1dbee6724c069a"
+  digest = "1:e7a14b8ecad894c855d35b978da4284b68174465aea4f3f6dcdcb89dba0df0a1"
   name = "github.com/docker/docker"
   packages = [
     "api",
@@ -53,7 +53,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "393838ca5ec5bc4ddf2cc9a8051d36adfd31e6a1"
+  revision = "d440fea4607b41c066bfee42dfaa719ee5ba2ec2"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -216,14 +216,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7941e2f16c0833b438cbef7fccfe4f8346f9f7876b42b29717a75d7e8c4800cb"
+  digest = "1:653cc9ff57cf744d21f74e811af4f330415284bfc291d28f716833618c02c876"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "aca44879d5644da7c5b8ec6a1115e9b6ea6c40d9"
+  revision = "afcc84fd7533758f95a6e93ae710aa945a0b7e73"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"

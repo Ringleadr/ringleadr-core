@@ -68,7 +68,7 @@ func main() {
 	Logger.Printf("Starting Agogos in %s mode", agogosMode)
 	//TODO Take from environment
 	containerRuntime := Containers.DockerRuntime{}
-	Containers.SetupConfig(containerRuntime)
+	Containers.SetupConfig(containerRuntime, false)
 
 	//Use multiple cores for efficiency
 	runtime.GOMAXPROCS(int(math.Min(float64(runtime.NumCPU()), 4)))

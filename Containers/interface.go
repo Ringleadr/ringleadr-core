@@ -11,9 +11,14 @@ type Container struct {
 	Env      []string          `json:"env"`
 	Ports    map[string]string `json:"ports"`
 	Storage  []StorageMount    `json:"storage"`
-	Networks []string          `json:"networks"`
+	Networks []Network         `json:"networks"`
 	Alias    string            `json:"alias"`
 	Stats    Stats             `json:"stats"`
+}
+
+type Network struct {
+	Name string `json:"name"`
+	Addr string `json:"addr"`
 }
 
 type Stats struct {

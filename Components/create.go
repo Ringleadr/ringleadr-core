@@ -13,15 +13,29 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int, netw
 		comp.Name = comp.Image
 	}
 
-	var newNetworks = []string{appName}
+	var networkNames = []string{appName}
 	for _, net := range networks {
-		newNetworks = append(newNetworks, fmt.Sprintf("agogos-%s", net))
+		networkNames = append(networkNames, fmt.Sprintf("agogos-%s", net))
+	}
+
+	var formatNetworks []Containers.Network
+	for _, net := range networkNames {
+		formatNetworks = append(formatNetworks, Containers.Network{Name: net})
 	}
 
 	runtime := Containers.GetContainerRuntime()
 	var storage []Containers.StorageMount
 	for _, s := range comp.Storage {
 		storage = append(storage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
+	}
+
+	var env []string
+	if Containers.UseProxy {
+		env = append(comp.Env, "HTTP_PROXY=http://agogos-proxy:8888",
+			"HTTPS_PROXY=http://agogos-proxy:8888", "http_proxy=http://agogos-proxy:8888",
+			"https_proxy=http://agogos-proxy:8888")
+	} else {
+		env = comp.Env
 	}
 	for i := 0; i < comp.Replicas; i++ {
 		cont := &Containers.Container{
@@ -34,9 +48,9 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int, netw
 			},
 			Storage:  storage,
 			Ports:    comp.Ports,
-			Networks: newNetworks,
+			Networks: formatNetworks,
 			Alias:    origName,
-			Env:      comp.Env,
+			Env:      env,
 		}
 		err := runtime.CreateContainer(cont)
 		if err != nil {
@@ -52,15 +66,29 @@ func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy in
 		comp.Name = comp.Image
 	}
 
-	var newNetworks = []string{appName}
+	var networkNames = []string{appName}
 	for _, net := range networks {
-		newNetworks = append(newNetworks, fmt.Sprintf("agogos-%s", net))
+		networkNames = append(networkNames, fmt.Sprintf("agogos-%s", net))
+	}
+
+	var formatNetworks []Containers.Network
+	for _, net := range networkNames {
+		formatNetworks = append(formatNetworks, Containers.Network{Name: net})
 	}
 
 	runtime := Containers.GetContainerRuntime()
 	var storage []Containers.StorageMount
 	for _, s := range comp.Storage {
 		storage = append(storage, Containers.StorageMount{Name: s.Name, MountPath: s.MountPath})
+	}
+
+	var env []string
+	if Containers.UseProxy {
+		env = append(comp.Env, "HTTP_PROXY=http://agogos-proxy:8888",
+			"HTTPS_PROXY=http://agogos-proxy:8888", "http_proxy=http://agogos-proxy:8888",
+			"https_proxy=http://agogos-proxy:8888")
+	} else {
+		env = comp.Env
 	}
 	cont := &Containers.Container{
 		Name:  Containers.GetContainerNameForComponent(comp.Name, appName, appCopy, replica),
@@ -72,9 +100,9 @@ func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy in
 		},
 		Storage:  storage,
 		Ports:    comp.Ports,
-		Networks: newNetworks,
+		Networks: formatNetworks,
 		Alias:    origName,
-		Env:      comp.Env,
+		Env:      env,
 	}
 	err := runtime.CreateContainer(cont)
 	if err != nil {
