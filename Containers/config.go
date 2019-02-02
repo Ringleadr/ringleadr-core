@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/docker/docker/client"
+	"os"
 	"strings"
 )
 
@@ -44,6 +45,10 @@ func GetContainerNameForComponent(componentName string, appName string, appCopy 
 }
 
 func startProxy() {
+	hostname, err := os.Hostname()
+	if err != nil {
+		panic("Can't get hostname to pass to agogos proxy. Exiting.")
+	}
 	Logger.Println("Starting proxy")
 	//Delete existing proxy if it exists:
 	_ = containerRuntime.DeleteContainer("agogos-proxy")
@@ -54,8 +59,11 @@ func startProxy() {
 		Labels: map[string]string{
 			"agogos-proxy": "",
 		},
+		Env: []string{
+			"AGOGOS_HOSTNAME=" + hostname,
+		},
 	}
-	err := containerRuntime.CreateContainer(proxy)
+	err = containerRuntime.CreateContainer(proxy)
 	if err != nil {
 		panic("Unable to start Agogos proxy: " + err.Error())
 	}

@@ -117,7 +117,9 @@ func startSecondaryDatastoreContainer(runtime Containers.ContainerRuntime, addre
 
 func getClient(mode string, address string) {
 	//Wait until the service is ready
-	waitUntilReady(mode)
+	if mode == "primary" {
+		waitUntilReady(mode)
+	}
 	//setup the client
 	mongoClient = setupClient(address)
 }
