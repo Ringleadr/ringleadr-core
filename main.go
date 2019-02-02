@@ -58,6 +58,7 @@ var putMethods = map[string]func(ctx *gin.Context){
 func main() {
 	background := flag.Bool("background", false, "Whether the host is running as a background process")
 	connectAddress := flag.String("connect", "", "Address of an existing Agogos primary to connect to (optional)")
+	proxy := flag.Bool("proxy", false, "Whether to use the agogos proxy for routing container requests")
 	flag.Parse()
 
 	Logger.InitLogger(*background)
@@ -68,7 +69,7 @@ func main() {
 	Logger.Printf("Starting Agogos in %s mode", agogosMode)
 	//TODO Take from environment
 	containerRuntime := Containers.DockerRuntime{}
-	Containers.SetupConfig(containerRuntime, false)
+	Containers.SetupConfig(containerRuntime, *proxy)
 
 	//Use multiple cores for efficiency
 	runtime.GOMAXPROCS(int(math.Min(float64(runtime.NumCPU()), 4)))

@@ -40,10 +40,12 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 			startDatastoreContainer(runtime)
 		}
 	} else if mode == "Secondary" {
-		cont, err := runtime.ReadContainer("agogos-mongo-secondary")
-		if !(err == nil && strings.Contains(cont.Status, "running")) {
-			startSecondaryDatastoreContainer(runtime, address)
-		}
+		/*
+			cont, err := runtime.ReadContainer("agogos-mongo-secondary")
+			if !(err == nil && strings.Contains(cont.Status, "running")) {
+				startSecondaryDatastoreContainer(runtime, address)
+			}
+		*/
 	}
 	//Get all items in the Applications database
 	apps, err := GetAllApps()

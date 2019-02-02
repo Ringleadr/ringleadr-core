@@ -42,17 +42,19 @@ func SetupDatastore(mode string, primaryAddress string) {
 		}
 	} else if mode == "Secondary" {
 		//Only create the container if one doesn't exist
-		cont, err := runtime.ReadContainer("agogos-mongo-secondary")
-		if !(err == nil && strings.Contains(cont.Status, "running")) {
+		/*
+			cont, err := runtime.ReadContainer("agogos-mongo-secondary")
+			if !(err == nil && strings.Contains(cont.Status, "running")) {
 
-			startSecondaryDatastoreContainer(runtime, primaryAddress)
+				startSecondaryDatastoreContainer(runtime, primaryAddress)
 
-			//Sleep to give time for db to start
-			//TODO do this is a more programatic way
-			time.Sleep(30 * time.Second)
-		} else {
-			Logger.Println("Using existing database")
-		}
+				//Sleep to give time for db to start
+				//TODO do this is a more programatic way
+				time.Sleep(30 * time.Second)
+			} else {
+				Logger.Println("Using existing database")
+			}
+		*/
 	}
 
 	getClient(strings.ToLower(mode), primaryAddress)
