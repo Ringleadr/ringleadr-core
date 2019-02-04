@@ -245,12 +245,29 @@ func (DockerRuntime) DeleteStorage(name string) error {
 	return nil
 }
 
-func (DockerRuntime) CreateNetwork(name string) error {
+func (d DockerRuntime) CreateNetwork(name string) error {
 	cli := GetDockerClient()
 
-	_, err := cli.NetworkCreate(context.Background(), name, types.NetworkCreate{})
+	resp, err := cli.NetworkCreate(context.Background(), name, types.NetworkCreate{
+		CheckDuplicate: true,
+	})
 	if err != nil {
 		return errors.New("Error creating network: " + err.Error())
+	}
+
+	//Check for a network created with a bad subnet
+	net, err := cli.NetworkInspect(context.Background(), resp.ID, types.NetworkInspectOptions{})
+	if err != nil {
+		return errors.New("Error checking network after creation: " + err.Error())
+	}
+	//Delete and recreate if the subnet is 192.168.0.0
+	if net.IPAM.Config[0].Subnet == "192.168.0.0/20" {
+		err := d.DeleteNetwork(name)
+		if err != nil {
+			return errors.New("error deleting invalid network: " + err.Error())
+		}
+		//Try to create the network again
+		return d.CreateNetwork(name)
 	}
 	return nil
 }
