@@ -111,10 +111,10 @@ func startProxy() {
 		if strings.Contains(err.Error(), "did not return single container") {
 			//Doesn't exist, let's make a new one
 		} else {
-			panic("Error checking for existing host proxy")
+			panic("Error checking for existing proxy")
 		}
 	} else if strings.Contains(cont.Status, "running") {
-		Logger.Println("Using existing host proxy")
+		Logger.Println("Using existing proxy")
 		return
 	}
 
@@ -150,10 +150,10 @@ func startReverseProxy() {
 		if strings.Contains(err.Error(), "did not return single container") {
 			//Doesn't exist, let's make a new one
 		} else {
-			panic("Error checking for existing host proxy")
+			panic("Error checking for existing reverse proxy")
 		}
 	} else if strings.Contains(cont.Status, "running") {
-		Logger.Println("Using existing host proxy")
+		Logger.Println("Using existing reverse proxy")
 		return
 	}
 
@@ -171,9 +171,12 @@ func startReverseProxy() {
 		Env: []string{
 			"AGOGOS_HOSTNAME=" + hostname,
 		},
+		Ports: map[string]string{
+			"0.0.0.0:14442": "14442",
+		},
 	}
 	err = containerRuntime.CreateContainer(proxy)
 	if err != nil {
-		panic("Unable to start Agogos proxy: " + err.Error())
+		panic("Unable to start Agogos reverse proxy: " + err.Error())
 	}
 }
