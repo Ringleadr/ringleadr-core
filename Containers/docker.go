@@ -94,10 +94,12 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 		PortBindings:  portBind,
 		Mounts:        mounts,
 		RestartPolicy: container.RestartPolicy{Name: "always"},
+		CapAdd:        cont.CapAdd,
 	}
 	//EW HACKY
 	if UseProxy {
-		if cont.Name != "agogos-proxy" && cont.Name != "agogos-mongo-primary" && cont.Name != "agogos-mongo-secondary" {
+		if cont.Name != "agogos-proxy" && cont.Name != "agogos-mongo-primary" && cont.Name != "agogos-mongo-secondary" &&
+			cont.Name != "agogos-reverse-proxy" && cont.Name != "host.docker.internal" {
 			hostConfig.Links = []string{"agogos-proxy"}
 		}
 	}

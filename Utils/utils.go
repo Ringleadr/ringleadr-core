@@ -4,6 +4,7 @@ import (
 	"log"
 	"math"
 	"net"
+	"os"
 )
 
 // Get preferred outbound ip of this machine
@@ -66,4 +67,11 @@ func StringArrayEquals(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+func GetEnvOrDefault(env string, def string) string {
+	if r := os.Getenv(env); r != "" {
+		return r
+	}
+	return def
 }

@@ -14,6 +14,7 @@ type Container struct {
 	Networks []Network         `json:"networks"`
 	Alias    string            `json:"alias"`
 	Stats    Stats             `json:"stats"`
+	CapAdd   []string          `json:"cap_add"`
 }
 
 type Network struct {
