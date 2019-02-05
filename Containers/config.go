@@ -26,18 +26,6 @@ func SetupConfig(contRuntime ContainerRuntime, useProxy bool) {
 	if err != nil {
 		panic(err)
 	}
-	if UseProxy {
-		err := contRuntime.CreateNetwork("agogos-proxy-net")
-		if err != nil {
-			panic("Error setting up proxy network: " + err.Error())
-		}
-		//Docker on linux does not have a DNS entry for for 'host.docker.internal' so we fake one with a container
-		if runtime.GOOS == "linux" {
-			startDockerHostProxy()
-		}
-		startProxy()
-		startReverseProxy()
-	}
 }
 
 func GetDockerClient() *client.Client {
@@ -53,6 +41,27 @@ func GetContainerNameForComponent(componentName string, appName string, appCopy 
 		strings.Replace(
 			fmt.Sprintf("agogos-%s-%d-%s-%d", appName, appCopy, componentName, replicaNo),
 			":", "_", -1), "/", ".", -1)
+}
+
+func StartProxies() {
+	if UseProxy {
+		exists, err := containerRuntime.NetworkExists("agogos-proxy-net")
+		if err != nil {
+			panic("could not check for existing agogos-proxy network: " + err.Error())
+		}
+		if !exists {
+			err = containerRuntime.CreateNetwork("agogos-proxy-net")
+			if err != nil {
+				panic("Error setting up proxy network: " + err.Error())
+			}
+		}
+		//Docker on linux does not have a DNS entry for for 'host.docker.internal' so we fake one with a container
+		if runtime.GOOS == "linux" {
+			startDockerHostProxy()
+		}
+		startProxy()
+		startReverseProxy()
+	}
 }
 
 func startDockerHostProxy() {
@@ -72,7 +81,7 @@ func startDockerHostProxy() {
 
 	hostProxy := &Container{
 		Name:  "host.docker.internal",
-		Image: "qoomon/docker-host",
+		Image: "edwarddobson/docker-host:" + Utils.GetEnvOrDefault("AGOGOS_HOST_PROXY_TAG", "latest"),
 		Labels: map[string]string{
 			"agogos-host-proxy": "",
 		},

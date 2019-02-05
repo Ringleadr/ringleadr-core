@@ -75,6 +75,7 @@ func main() {
 	runtime.GOMAXPROCS(int(math.Min(float64(runtime.NumCPU()), 4)))
 
 	Datastore.SetupDatastore(agogosMode, *connectAddress)
+	Containers.StartProxies()
 	r := setupRouter()
 	for path, handler := range getMethods {
 		r.GET(path, handler)
