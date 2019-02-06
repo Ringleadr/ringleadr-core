@@ -12,7 +12,7 @@ import (
 func ListNodes(ctx *gin.Context) {
 	nodes, err := Datastore.GetAllNodes()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 

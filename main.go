@@ -25,7 +25,7 @@ import (
 
 var getMethods = map[string]func(ctx *gin.Context){
 	"/ping": func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
+		ctx.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	},
@@ -110,7 +110,9 @@ func main() {
 
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(Logger.Middleware())
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowMethods = append(corsConfig.AllowMethods, "DELETE")
 	corsConfig.AllowAllOrigins = true

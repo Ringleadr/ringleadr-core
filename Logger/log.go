@@ -1,6 +1,7 @@
 package Logger
 
 import (
+	"io"
 	"log"
 	"os"
 	"runtime/debug"
@@ -12,12 +13,16 @@ const logFlag int = log.Ldate | log.Ltime
 var (
 	logger    *log.Logger
 	errLogger *log.Logger
+	Out       io.Writer
+	ErrOut    io.Writer
 )
 
 func InitLogger(background bool) {
+	Out = os.Stdout
+	ErrOut = os.Stderr
 	//TODO change to file based logging if we're in background mode
-	logger = log.New(os.Stdout, "[AGOGOS] ", logFlag)
-	errLogger = log.New(os.Stderr, "[AGOGOS] ", logFlag)
+	logger = log.New(Out, "[AGOGOS] ", logFlag)
+	errLogger = log.New(ErrOut, "[AGOGOS] ", logFlag)
 }
 
 func getCallerLine() string {

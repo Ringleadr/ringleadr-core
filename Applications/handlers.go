@@ -136,7 +136,7 @@ func DeleteApplication(ctx *gin.Context) {
 	err = Datastore.DeleteComponentsFor(name)
 	if err != nil {
 		//Not a crucial error so we won't return a non 200 code here, just log the error
-		Logger.ErrPrintf("Could not remove stats for %s: %s", name, err.Error())
+		Logger.ErrPrintf("Could not remove components for %s: %s", name, err.Error())
 	}
 
 	ctx.JSON(http.StatusOK, nil)

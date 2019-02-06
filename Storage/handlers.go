@@ -10,14 +10,14 @@ import (
 
 func CreateStorage(ctx *gin.Context) {
 	if ctx.Param("name") == "" {
-		ctx.JSON(http.StatusInternalServerError, "must specify storage name")
+		ctx.String(http.StatusInternalServerError, "must specify storage name")
 		return
 	}
 	name := fmt.Sprintf("agogos-%s", ctx.Param("name"))
 
 	err := Datastore.InsertStorage(&Datatypes.Storage{Name: name})
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -26,14 +26,18 @@ func CreateStorage(ctx *gin.Context) {
 
 func DeleteStorage(ctx *gin.Context) {
 	if ctx.Param("name") == "" {
-		ctx.JSON(http.StatusInternalServerError, "must specify storage name")
+		ctx.String(http.StatusInternalServerError, "must specify storage name")
 		return
 	}
 	name := fmt.Sprintf("agogos-%s", ctx.Param("name"))
 
 	err := Datastore.DeleteStorage(name)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		if err.Error() == "not found" {
+			ctx.String(http.StatusNotFound, "No such storage %s", ctx.Param("name"))
+			return
+		}
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -46,7 +50,7 @@ func DeleteStorage(ctx *gin.Context) {
 func ListStorage(ctx *gin.Context) {
 	storage, err := Datastore.GetAllStorage()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
