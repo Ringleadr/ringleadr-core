@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+/*
+	NOTE this file is  no longer in use by this project, but remains so it can be documented as part of the write up,
+	and as an idea of how watchers should be implemented if I decide to return to the idea
+*/
+
 //Watch actions
 
 func watchApplications(coll *mgo.Collection) {

@@ -91,6 +91,14 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 	//Look for components without matching containers (create missing)
 	timeStamp := time.Now().Unix()
 	for _, app := range apps {
+		oldMessages := app.Messages
+		var prunedMessages []string
+		for _, mesg := range app.Messages {
+			if strings.Contains(mesg, "Application is scheduled on inactive node") {
+				prunedMessages = append(prunedMessages, mesg)
+			}
+		}
+		app.Messages = prunedMessages
 		if app.Node != hostname && app.Node != "*" {
 			continue
 		}
@@ -114,7 +122,6 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 							formatError := fmt.Sprintf("Error starting component %s: %s", comp.Name, err.Error())
 							if !Utils.StringArrayContains(app.Messages, formatError) {
 								app.Messages = append(app.Messages, formatError)
-								shouldSave = true
 							}
 						}
 					} else {
@@ -146,6 +153,9 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 					shouldSave = true
 				}
 			}
+		}
+		if !Utils.StringArrayEquals(app.Messages, oldMessages) {
+			shouldSave = true
 		}
 		if shouldSave {
 			err := UpdateApp(&app)
@@ -318,7 +328,11 @@ func checkForInactiveNodes(nodes []Datatypes.Node, hostname string) {
 			continue
 		}
 		oldStatus := node.Active
-		resp, err := http.Get(fmt.Sprintf("http://%s:14440/ping", node.Address))
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s:14440/ping", node.Address), nil)
+		req.Header.Add("X-agogos-disable-log", "true")
+		client := http.Client{}
+		client.Timeout = 1 * time.Second
+		resp, err := client.Do(req)
 		if err != nil || resp.StatusCode != http.StatusOK {
 			node.Active = false
 		} else {
@@ -342,6 +356,19 @@ func displayErrorForAppsOnInactiveNodes(apps []Datatypes.Application, nodes []Da
 					formatError := fmt.Sprintf("Application is scheduled on inactive node: %s", node.Name)
 					if !Utils.StringArrayContains(app.Messages, formatError) {
 						app.Messages = append(app.Messages, formatError)
+						shouldSave = true
+					}
+				} else {
+					//Remove inactive message if the node comes back online
+					formatError := fmt.Sprintf("Application is scheduled on inactive node: %s", node.Name)
+					if Utils.StringArrayContains(app.Messages, formatError) {
+						var newMessages []string
+						for _, mesg := range app.Messages {
+							if mesg != formatError {
+								newMessages = append(newMessages, mesg)
+							}
+						}
+						app.Messages = newMessages
 						shouldSave = true
 					}
 				}
