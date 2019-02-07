@@ -1,10 +1,12 @@
 package Utils
 
 import (
+	"github.com/pkg/errors"
 	"log"
 	"math"
 	"net"
 	"os"
+	"runtime"
 )
 
 // Get preferred outbound ip of this machine
@@ -74,4 +76,22 @@ func GetEnvOrDefault(env string, def string) string {
 		return r
 	}
 	return def
+}
+
+func GetUserHomeDir() (string, error) {
+	if runtime.GOOS == "windows" {
+		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
+		if home == "" {
+			home = os.Getenv("USERPROFILE")
+		}
+		if home == "" {
+			return "", errors.New("Could not get home directory")
+		}
+		return home, nil
+	}
+	home := os.Getenv("HOME")
+	if home == "" {
+		return "", errors.New("Could not get home directory")
+	}
+	return home, nil
 }

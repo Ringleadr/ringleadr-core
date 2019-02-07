@@ -115,11 +115,13 @@ func UpdateApplication(ctx *gin.Context) {
 	code, err := deleteApplication(app.Name)
 	if err != nil {
 		ctx.String(code, err.Error())
+		return
 	}
 
 	err = createApplication(app)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	ctx.JSON(http.StatusOK, nil)
@@ -131,6 +133,7 @@ func DeleteApplication(ctx *gin.Context) {
 	code, err := deleteApplication(name)
 	if err != nil {
 		ctx.String(code, err.Error())
+		return
 	}
 
 	err = Datastore.DeleteComponentsFor(name)

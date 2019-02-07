@@ -40,6 +40,7 @@ func Register(ctx *gin.Context) {
 	} else if err != nil {
 		Logger.ErrPrintf("Error checking for existing node entry: %s", err.Error())
 		ctx.String(http.StatusInternalServerError, "Error checking for existing node entry: %s"+err.Error())
+		return
 	}
 	ctx.JSON(http.StatusOK, nil)
 }

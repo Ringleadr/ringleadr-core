@@ -258,6 +258,7 @@
     "github.com/gin-gonic/gin",
     "github.com/globalsign/mgo",
     "github.com/globalsign/mgo/bson",
+    "github.com/mattn/go-isatty",
     "github.com/pkg/errors",
     "golang.org/x/net/webdav",
   ]
