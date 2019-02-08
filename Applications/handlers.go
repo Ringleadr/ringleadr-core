@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -160,19 +161,23 @@ func deleteApplication(name string) (int, error) {
 	}
 	//Changestreams don't handle deletes well, start a new goroutine to delete components from here
 	//Delete the implicit application network
-	go Components.DeleteAllComponents(name, app.Copies)
-	go func() {
-		retries := 5
-		var err error
-		for retries > 0 {
-			if err = Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
-				return
+	//We only need to issue these delete commands if the app is running on this node
+	//If there is an error getting the hostname then just ignore it, as it should be cleaned up by the sync thread later anyway
+	if host, err := os.Hostname(); err == nil && host == app.Node || "*" == app.Node {
+		go Components.DeleteAllComponents(name, app.Copies)
+		go func() {
+			retries := 5
+			var err error
+			for retries > 0 {
+				if err = Containers.GetContainerRuntime().DeleteNetwork(app.Name); err == nil {
+					return
+				}
+				time.Sleep(5 * time.Second)
+				retries -= 1
 			}
-			time.Sleep(5 * time.Second)
-			retries -= 1
-		}
-		Logger.ErrPrintf("Error deleting implicit network %s: %s", app.Name, err.Error())
-	}()
+			Logger.ErrPrintf("Error deleting implicit network %s: %s", app.Name, err.Error())
+		}()
+	}
 	return http.StatusOK, nil
 }
 

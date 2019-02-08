@@ -67,7 +67,7 @@ func main() {
 		agogosMode = "Secondary"
 	}
 	Logger.Printf("Starting Agogos in %s mode", agogosMode)
-	//TODO Take from environment
+	//TODO Take from environment (Out of scope)
 	containerRuntime := Containers.DockerRuntime{}
 	Containers.SetupConfig(containerRuntime, *proxy)
 
@@ -99,7 +99,7 @@ func main() {
 		_, err = http.Post(fmt.Sprintf("http://%s:14440/nodes/register", *connectAddress),
 			"application/json", strings.NewReader(reqString))
 		if err != nil {
-			println(err.Error())
+			Logger.ErrPrintf("Error sending register request to host %s: %s", *connectAddress, err.Error())
 		}
 	}
 	Logger.Println("Starting front end...")

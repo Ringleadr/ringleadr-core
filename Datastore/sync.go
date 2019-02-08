@@ -7,7 +7,6 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Utils"
-	"log"
 	"math"
 	"net/http"
 	"os"
@@ -26,7 +25,6 @@ func startSync(mode string, address string) {
 }
 
 func syncTick(runtime Containers.ContainerRuntime, mode string, address string) {
-	//TODO remove old error messages if they are no longer valid
 	hostname, err := os.Hostname()
 	if err != nil {
 		//skip this go and try again next time
@@ -50,21 +48,21 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 	//Get all items in the Applications database
 	apps, err := GetAllApps()
 	if err != nil {
-		log.Printf("error getting Applications from datastore in sync thread: %s", err.Error())
+		Logger.ErrPrintf("error getting Applications from datastore in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
 		return
 	}
 
 	containers, err := runtime.ReadAllContainers()
 	if err != nil {
-		log.Printf("error getting containers from runtime in sync thread: %s", err.Error())
+		Logger.ErrPrintf("error getting containers from runtime in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
 		return
 	}
 
 	networks, err := GetAllNetworks()
 	if err != nil {
-		log.Printf("error getting networks from datastore in sync thread: %s", err.Error())
+		Logger.ErrPrintf("error getting networks from datastore in sync thread: %s", err.Error())
 		//We don't explicitly deal with the error here as we will come back around again in 10s and retry
 		return
 	}
@@ -94,7 +92,7 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 		oldMessages := app.Messages
 		var prunedMessages []string
 		for _, mesg := range app.Messages {
-			if strings.Contains(mesg, "Application is scheduled on inactive node") {
+			if strings.Contains(mesg, "Application is scheduled on inactive node") || strings.Contains(mesg, "No such node") {
 				prunedMessages = append(prunedMessages, mesg)
 			}
 		}
@@ -210,7 +208,11 @@ func createMissingAppNetworks(app Datatypes.Application, runtime Containers.Cont
 
 func createMissingStorage(comp *Datatypes.Component, runtime Containers.ContainerRuntime) {
 	for _, store := range comp.Storage {
-		if s, err := GetStorage(fmt.Sprintf("agogos-%s", store.Name)); s == nil && err == nil {
+		if store.Name[0] == '/' {
+			//Skip storage which is mounting a host directory
+			continue
+		}
+		if s, err := GetStorage(fmt.Sprintf("agogos-%s", store.Name)); err == nil && s == nil {
 			err := InsertStorage(&Datatypes.Storage{Name: fmt.Sprintf("agogos-%s", store.Name)})
 			if err != nil {
 				continue //skip this storage, should be cleaned up later by a watcher
@@ -270,7 +272,7 @@ func createMissingNetworks(networks []Datatypes.Network, runtime Containers.Cont
 	for _, net := range networks {
 		exists, err := runtime.NetworkExists(net.Name)
 		if err != nil {
-			log.Printf("error checking network %s in runtime from sync thread. Error was: %s", net.Name, err.Error())
+			Logger.ErrPrintf("error checking network %s in runtime from sync thread. Error was: %s", net.Name, err.Error())
 			continue
 		}
 		if !exists {
@@ -350,8 +352,17 @@ func checkForInactiveNodes(nodes []Datatypes.Node, hostname string) {
 func displayErrorForAppsOnInactiveNodes(apps []Datatypes.Application, nodes []Datatypes.Node) {
 	for _, app := range apps {
 		shouldSave := false
+		found := false
+		if app.Node == "*" {
+			found = true
+		}
+		if app.Node == "" {
+			//Node not assign yet, don't waste time potentially saving an error
+			continue
+		}
 		for _, node := range nodes {
 			if app.Node == node.Name {
+				found = true
 				if !node.Active {
 					formatError := fmt.Sprintf("Application is scheduled on inactive node: %s", node.Name)
 					if !Utils.StringArrayContains(app.Messages, formatError) {
@@ -372,6 +383,35 @@ func displayErrorForAppsOnInactiveNodes(apps []Datatypes.Application, nodes []Da
 						shouldSave = true
 					}
 				}
+			}
+		}
+		//App they are scheduled on does not exist in the node list
+		if !found {
+			//Add an error message if it doesn't already have one
+			formatMessage := fmt.Sprintf("No such node: %s", app.Node)
+			if !Utils.StringArrayContains(app.Messages, formatMessage) {
+				app.Messages = append(app.Messages, formatMessage)
+				shouldSave = true
+			}
+		} else {
+			//Node exists
+			//Remove the error message if it has one
+			foundIndex := -1
+			for i, msg := range app.Messages {
+				if strings.Index(msg, "No such node") > -1 {
+					foundIndex = i
+					break
+				}
+			}
+			if foundIndex > -1 {
+				var newMesg []string
+				for i, msg := range app.Messages {
+					if i != foundIndex {
+						newMesg = append(newMesg, msg)
+					}
+				}
+				app.Messages = newMesg
+				shouldSave = true
 			}
 		}
 		if shouldSave {

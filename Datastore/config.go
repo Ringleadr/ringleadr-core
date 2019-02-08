@@ -36,7 +36,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 
 			//Sleep to give time for db to start
 			//TODO do this is a more programatic way
-			time.Sleep(1 * time.Minute)
+			time.Sleep(30 * time.Second)
 		} else {
 			Logger.Println("Using existing database")
 		}

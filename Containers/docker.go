@@ -86,8 +86,13 @@ func (DockerRuntime) CreateContainer(cont *Container) error {
 
 	mounts := []mount.Mount{}
 	for _, store := range cont.Storage {
-		mounts = append(mounts, mount.Mount{Type: mount.TypeVolume,
-			Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
+		if store.Name[0] == '/' { //Mount a folder, don't create a volume
+			mounts = append(mounts, mount.Mount{Type: mount.TypeBind, Source: store.Name, Target: store.MountPath})
+		} else { //Don't create a folder
+			mounts = append(mounts, mount.Mount{Type: mount.TypeVolume,
+				Source: fmt.Sprintf("agogos-%s", store.Name), Target: store.MountPath})
+
+		}
 	}
 
 	hostConfig := &container.HostConfig{
@@ -336,6 +341,8 @@ func dockerContainerToInterface(dockerCont types.Container) (*Container, error) 
 	}
 
 	//TODO try to get env here
+	// (Env requires the container.inspect option, which would require significant rewrites further up.
+	// Env should be saved in the database anyway so I don't think it's necessary)
 	cont := &Container{
 		ID:       dockerCont.ID,
 		Image:    dockerCont.Image,

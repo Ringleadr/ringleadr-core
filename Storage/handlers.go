@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,6 +26,7 @@ func CreateStorage(ctx *gin.Context) {
 }
 
 func DeleteStorage(ctx *gin.Context) {
+	//TODO check if any apps are using the storage before deleting it
 	if ctx.Param("name") == "" {
 		ctx.String(http.StatusInternalServerError, "must specify storage name")
 		return
@@ -42,7 +44,13 @@ func DeleteStorage(ctx *gin.Context) {
 	}
 
 	//Trigger the deletion here as the watcher can't do it
-	go Datastore.DeleteStorageInRuntime(name)
+	go func() {
+		err := Datastore.DeleteStorageInRuntime(name)
+		if err != nil {
+			Logger.ErrPrintf("Error deleting storage %s in runtime: %s", name, err)
+		}
+
+	}()
 
 	ctx.JSON(http.StatusOK, nil)
 }

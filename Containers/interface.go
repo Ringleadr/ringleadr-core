@@ -31,8 +31,6 @@ type StorageMount struct {
 	MountPath string `json:"mount_path"`
 }
 
-//TODO Add ports to Interface
-
 type ContainerRuntime interface {
 	AssertOnline() error
 	CreateContainer(container *Container) error

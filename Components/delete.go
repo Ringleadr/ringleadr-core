@@ -6,7 +6,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 )
 
-func DeleteAllComponents(appName string, appCopies int) error {
+func DeleteAllComponents(appName string, appCopies int) {
 	runtime := Containers.GetContainerRuntime()
 	for i := 0; i < appCopies; i++ {
 		filter := map[string]map[string]bool{
@@ -22,5 +22,4 @@ func DeleteAllComponents(appName string, appCopies int) error {
 		}(filter)
 		//Ignore any errors and hope they are fixed later
 	}
-	return nil
 }

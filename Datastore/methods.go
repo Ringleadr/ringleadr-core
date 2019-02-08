@@ -46,7 +46,6 @@ func GetAllApps() ([]Datatypes.Application, error) {
 }
 
 func DeleteApp(name string) error {
-	//TODO check if app exists before deleting (otherwise this returns a blank error)
 	err := applicationCollection.Remove(bson.M{"name": name})
 	if err != nil {
 		return err
@@ -63,7 +62,6 @@ func InsertStorage(storage *Datatypes.Storage) error {
 }
 
 func DeleteStorage(name string) error {
-	//TODO returns empty error when it can't delete the required item
 	err := storageCollection.Remove(bson.M{"name": name})
 	if err != nil {
 		return err
@@ -101,7 +99,6 @@ func InsertNetwork(network *Datatypes.Network) error {
 }
 
 func DeleteNetwork(name string) error {
-	//TODO returns empty error when it can't delete the required item
 	err := networkCollection.Remove(bson.M{"name": name})
 	if err != nil {
 		return err
@@ -139,7 +136,6 @@ func InsertNode(node *Datatypes.Node) error {
 }
 
 func DeleteNode(name string) error {
-	//TODO returns empty error when it can't delete the required item
 	err := nodesCollection.Remove(bson.M{"name": name})
 	if err != nil {
 		return err
