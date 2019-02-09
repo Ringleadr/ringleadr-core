@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
+	"github.com/GodlikePenguin/agogos-host/Logger"
+	"github.com/GodlikePenguin/agogos-host/Utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -31,7 +33,21 @@ func DeleteNetwork(ctx *gin.Context) {
 	}
 	name := fmt.Sprintf("agogos-%s", ctx.Param("name"))
 
-	err := Datastore.DeleteNetwork(name)
+	apps, err := Datastore.GetAllApps()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error checking if network can be deleted: %s", err.Error())
+		return
+	}
+
+	for _, app := range apps {
+		if Utils.StringArrayContains(app.Networks, ctx.Param("name")) {
+			ctx.String(http.StatusBadRequest, "Cannot delete network %s as it is in use by application %s."+
+				" Please delete this application between deleting the network.", ctx.Param("name"), app.Name)
+			return
+		}
+	}
+
+	err = Datastore.DeleteNetwork(name)
 	if err != nil {
 		if err.Error() == "not found" {
 			ctx.String(http.StatusNotFound, "No such network %s", ctx.Param("name"))
@@ -42,7 +58,12 @@ func DeleteNetwork(ctx *gin.Context) {
 	}
 
 	//Trigger the deletion here as the watcher can't do it
-	go Datastore.DeleteNetworkInRuntime(name)
+	go func() {
+		err := Datastore.DeleteNetworkInRuntime(name)
+		if err != nil {
+			Logger.ErrPrintf("Error deleting network in runtime: %s", err.Error())
+		}
+	}()
 
 	ctx.JSON(http.StatusOK, nil)
 }
