@@ -44,3 +44,29 @@ func Register(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, nil)
 }
+
+func DeleteNode(ctx *gin.Context) {
+	name := ctx.Param("name")
+	node, err := Datastore.GetNode(name)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error searching for node: %s", err.Error())
+		return
+	}
+
+	if node == nil {
+		ctx.String(http.StatusNotFound, "No such node: %s", name)
+		return
+	}
+
+	if node.Active == true {
+		ctx.String(http.StatusBadRequest, "Cannot delete an active node")
+		return
+	}
+
+	err = Datastore.DeleteNode(name)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting node: %s", err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, nil)
+}

@@ -49,6 +49,7 @@ var deleteMethods = map[string]func(ctx *gin.Context){
 	"/applications/:name": Applications.DeleteApplication,
 	"/storage/:name":      Storage.DeleteStorage,
 	"/networks/:name":     Networks.DeleteNetwork,
+	"/node/:name":         Nodes.DeleteNode,
 }
 
 var putMethods = map[string]func(ctx *gin.Context){
