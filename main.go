@@ -36,6 +36,7 @@ var getMethods = map[string]func(ctx *gin.Context){
 	"/storage":                     Storage.ListStorage,
 	"/networks":                    Networks.ListNetworks,
 	"/nodes":                       Nodes.ListNodes,
+	"/node/:name/stats":            Nodes.Stats,
 }
 
 var postMethods = map[string]func(ctx *gin.Context){

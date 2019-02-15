@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5d856074ca1e71983fd08236583f8e7cb902c85e19becc6ae36028f3b9ebff49"
+  digest = "1:f7263cbc93a739e4d9bb88e3a209d77f65137fe23a959e196a1f90722976e265"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4213e7bf50ca6ca87e64fe620b523b5704af5c00"
+  revision = "b68a8b13f4ec6843e990509bfc1ccf02192eac7d"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -16,6 +16,22 @@
   pruneopts = "UT"
   revision = "97e4973ce50b2ff5f09635a57e2b88a037aae829"
   version = "v0.4.11"
+
+[[projects]]
+  digest = "1:e92f5581902c345eb4ceffdcd4a854fb8f73cf436d47d837d1ec98ef1fe0a214"
+  name = "github.com/StackExchange/wmi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5d049714c4a64225c3c79a7cf7d02f7fb5b96338"
+  version = "1.0.0"
+
+[[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:4ddc17aeaa82cb18c5f0a25d7c253a10682f518f4b2558a82869506eec223d76"
@@ -30,7 +46,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e7a14b8ecad894c855d35b978da4284b68174465aea4f3f6dcdcb89dba0df0a1"
+  digest = "1:0bf8ebe07503ac16cb098ba4f0746aba1a255d7c2b8be1c18bd2d4347e362717"
   name = "github.com/docker/docker"
   packages = [
     "api",
@@ -53,7 +69,7 @@
     "errdefs",
   ]
   pruneopts = "UT"
-  revision = "d440fea4607b41c066bfee42dfaa719ee5ba2ec2"
+  revision = "fcb286895b7043d8c8a6357b9d001e515d560e9f"
 
 [[projects]]
   digest = "1:811c86996b1ca46729bad2724d4499014c4b9effd05ef8c71b852aad90deb0ce"
@@ -117,6 +133,17 @@
   ]
   pruneopts = "UT"
   revision = "eeefdecb41b842af6dc652aaea4026e8403e62df"
+
+[[projects]]
+  digest = "1:c96d16a4451e48e2c44b2c3531fd8ec9248d822637f1911a88959ca0bcae4a64"
+  name = "github.com/go-ole/go-ole"
+  packages = [
+    ".",
+    "oleutil",
+  ]
+  pruneopts = "UT"
+  revision = "39dc8486bd0952279431257138bc428275b86797"
+  version = "v1.2.2"
 
 [[projects]]
   digest = "1:d059a146ab350e553c2687d3e17f198eb5b27c7cf55fe6ba0e2d21349df63388"
@@ -194,6 +221,18 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:a60beb391f29ba3525ad727182c89dd4b49a582640de8aa995aa2204df4a9bda"
+  name = "github.com/shirou/gopsutil"
+  packages = [
+    "cpu",
+    "internal/common",
+    "mem",
+  ]
+  pruneopts = "UT"
+  revision = "071446942108a03a13cf0717275ad3bdbcb691b4"
+  version = "v2.19.01"
+
+[[projects]]
   digest = "1:4887e9e89c80299aa520d718239809fdd2a47a9aa394909b169959bfbc424ddf"
   name = "github.com/ugorji/go"
   packages = ["codec"]
@@ -212,18 +251,18 @@
     "webdav/internal/xml",
   ]
   pruneopts = "UT"
-  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
+  revision = "3a22650c66bd7f4fb6d1e8072ffd7b75c8a27898"
 
 [[projects]]
   branch = "master"
-  digest = "1:653cc9ff57cf744d21f74e811af4f330415284bfc291d28f716833618c02c876"
+  digest = "1:0d703f14f9bbbe1070ff0ce86d749dcbc9d68fb0ae554252c09bd4bb37a072e7"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "afcc84fd7533758f95a6e93ae710aa945a0b7e73"
+  revision = "d0b11bdaac8adb652bff00e49bcacf992835621a"
 
 [[projects]]
   digest = "1:cbc72c4c4886a918d6ab4b95e347ffe259846260f99ebdd8a198c2331cf2b2e9"
@@ -246,6 +285,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/GodlikePenguin/agogos-datatypes",
+    "github.com/davecgh/go-spew/spew",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",
     "github.com/docker/docker/api/types/filters",
@@ -260,6 +300,8 @@
     "github.com/globalsign/mgo/bson",
     "github.com/mattn/go-isatty",
     "github.com/pkg/errors",
+    "github.com/shirou/gopsutil/cpu",
+    "github.com/shirou/gopsutil/mem",
     "golang.org/x/net/webdav",
   ]
   solver-name = "gps-cdcl"
