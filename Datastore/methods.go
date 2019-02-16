@@ -174,6 +174,8 @@ func UpdateNode(node *Datatypes.Node) error {
 
 // FIELDS FOR COMPONENT STATS
 
+//TODO Move these fields to the datatypes repository
+
 type ComponentEntry struct {
 	AppName       string      `json:"app_name" bson:"app_name"`
 	ComponentName string      `json:"component_name" bson:"component_name"`
@@ -232,6 +234,8 @@ func DeleteComponentsFor(appName string) error {
 	return nil
 }
 
+//TODO move this field to the datatypes repository
+
 type Overview struct {
 	Applications int `json:"applications"`
 	Networks     int `json:"networks"`
@@ -262,4 +266,40 @@ func GetOverview() (*Overview, error) {
 		Storage:      noStorage,
 		Nodes:        noNodes,
 	}, nil
+}
+
+func UpdateOrInsertNodeStats(nodeName string, stats *Datatypes.NodeStats) error {
+	_, err := nodeStatsCollection.Upsert(bson.M{
+		"name": nodeName,
+	}, bson.M{
+		"$push": bson.M{
+			"stats": stats,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetNodeStats(nodeName string) (*Datatypes.NodeStatsEntry, error) {
+	stats := &Datatypes.NodeStatsEntry{}
+	err := nodeStatsCollection.Find(bson.M{
+		"name": nodeName,
+	}).One(stats)
+	if err != nil {
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return stats, err
+}
+
+func DeleteStatsFor(nodeName string) error {
+	err := nodeStatsCollection.Remove(bson.M{"name": nodeName})
+	if err != nil {
+		return err
+	}
+	return nil
 }

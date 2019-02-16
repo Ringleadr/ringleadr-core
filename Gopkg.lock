@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f7263cbc93a739e4d9bb88e3a209d77f65137fe23a959e196a1f90722976e265"
+  digest = "1:2d517ddc7f31374309fa1ad10d3f6390b915100a3ecfa500b6fa8e3001a53452"
   name = "github.com/GodlikePenguin/agogos-datatypes"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b68a8b13f4ec6843e990509bfc1ccf02192eac7d"
+  revision = "23cdc58dfe3ff2868f04c64140da8a3d069982a9"
 
 [[projects]]
   digest = "1:f9ae348e1f793dcf9ed930ed47136a67343dbd6809c5c91391322267f4476892"
@@ -24,14 +24,6 @@
   pruneopts = "UT"
   revision = "5d049714c4a64225c3c79a7cf7d02f7fb5b96338"
   version = "1.0.0"
-
-[[projects]]
-  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  pruneopts = "UT"
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
 
 [[projects]]
   digest = "1:4ddc17aeaa82cb18c5f0a25d7c253a10682f518f4b2558a82869506eec223d76"
@@ -285,7 +277,6 @@
   analyzer-version = 1
   input-imports = [
     "github.com/GodlikePenguin/agogos-datatypes",
-    "github.com/davecgh/go-spew/spew",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",
     "github.com/docker/docker/api/types/filters",

@@ -20,6 +20,7 @@ var (
 	storageCollection     *mgo.Collection
 	networkCollection     *mgo.Collection
 	nodesCollection       *mgo.Collection
+	nodeStatsCollection   *mgo.Collection
 )
 
 func SetupDatastore(mode string, primaryAddress string) {
@@ -142,6 +143,7 @@ func setupTables() {
 	storageCollection = agogosDB.C("storage")
 	networkCollection = agogosDB.C("networks")
 	nodesCollection = agogosDB.C("nodes")
+	nodeStatsCollection = agogosDB.C("nodestats")
 }
 
 func startWatchers() {

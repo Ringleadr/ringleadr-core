@@ -68,5 +68,25 @@ func DeleteNode(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, "Error deleting node: %s", err.Error())
 		return
 	}
+
+	err = Datastore.DeleteStatsFor(name)
+	if err != nil {
+		//Non critical error so we just log it and carry on
+		Logger.ErrPrintf("Error removing stats for node %s: %s", name, err.Error())
+	}
 	ctx.JSON(http.StatusOK, nil)
+}
+
+func Stats(ctx *gin.Context) {
+	name := ctx.Param("name")
+	stats, err := Datastore.GetNodeStats(name)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Could not read stats for %s: %s", name, err.Error())
+		return
+	}
+	if stats == nil {
+		ctx.String(http.StatusNotFound, "No such node: %s", name)
+		return
+	}
+	ctx.JSON(http.StatusOK, stats)
 }

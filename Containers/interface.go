@@ -40,6 +40,7 @@ type ContainerRuntime interface {
 	UpdateContainer(container *Container) error
 	DeleteContainer(id string) error
 	DeleteContainerWithFilter(filter map[string]map[string]bool) error
+	NumberOfContainers() (int, error)
 	CreateStorage(name string) error
 	DeleteStorage(name string) error
 	CreateNetwork(name string) error

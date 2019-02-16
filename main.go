@@ -104,8 +104,10 @@ func main() {
 			Logger.ErrPrintf("Error sending register request to host %s: %s", *connectAddress, err.Error())
 		}
 	}
-	Logger.Println("Starting front end...")
+	Logger.Println("Starting front end")
 	go http.ListenAndServe(":14441", http.FileServer(static.HTTP))
+	Logger.Println("Starting reporter thread")
+	Nodes.StartStatsReporter()
 	Logger.Println("Ready to serve")
 	log.Fatal(r.Run(":14440"))
 }

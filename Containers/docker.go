@@ -232,6 +232,14 @@ func (d DockerRuntime) DeleteContainerWithFilter(filter map[string]map[string]bo
 	return nil
 }
 
+func (d DockerRuntime) NumberOfContainers() (int, error) {
+	conts, err := d.ReadAllContainers()
+	if err != nil {
+		return 0, err
+	}
+	return len(conts), nil
+}
+
 func (DockerRuntime) CreateStorage(name string) error {
 	cli := GetDockerClient()
 
