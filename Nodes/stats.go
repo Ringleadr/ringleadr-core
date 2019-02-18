@@ -5,9 +5,11 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/GodlikePenguin/agogos-host/Logger"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
+	"net/http"
 	"os"
 	"time"
 )
@@ -65,4 +67,12 @@ func getStats() (*Datatypes.NodeStats, error) {
 		NumContainers:  numConts,
 	}
 	return stats, nil
+}
+
+func DeleteAllStats(ctx *gin.Context) {
+	err := Datastore.DeleteAllNodeStats()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting node stats: %s", err.Error())
+	}
+	ctx.JSON(http.StatusOK, nil)
 }

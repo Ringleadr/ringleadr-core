@@ -249,6 +249,11 @@ func DeleteComponentsFor(appName string) error {
 	return nil
 }
 
+func DeleteCompStats() error {
+	_, err := componentCollection.RemoveAll(nil)
+	return err
+}
+
 //TODO move this field to the datatypes repository
 
 type Overview struct {
@@ -317,4 +322,9 @@ func DeleteStatsFor(nodeName string) error {
 		return err
 	}
 	return nil
+}
+
+func DeleteAllNodeStats() error {
+	_, err := nodeStatsCollection.RemoveAll(nil)
+	return err
 }
