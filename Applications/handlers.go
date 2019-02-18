@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -38,7 +39,15 @@ func createApplication(app *Datatypes.Application) error {
 		app.Copies = 1
 	}
 
+	unnamedCounter := 0
 	for _, comp := range app.Components {
+		if comp.Name == "" {
+			comp.Name = fmt.Sprintf("no-name-%d", unnamedCounter)
+			unnamedCounter++
+		}
+
+		comp.Name = strings.Replace(comp.Name, "/", "_", -1)
+
 		if comp.Replicas < 1 {
 			comp.Replicas = 1
 		}

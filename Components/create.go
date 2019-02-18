@@ -5,12 +5,13 @@ import (
 	"github.com/GodlikePenguin/agogos-datatypes"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"strconv"
+	"strings"
 )
 
 func StartComponent(comp *Datatypes.Component, appName string, appCopy int, networks []string) error {
-	origName := comp.Name
-	if comp.Name == "" {
-		comp.Name = comp.Image
+	alias := ""
+	if !strings.Contains(comp.Name, "no-name") {
+		alias = comp.Name
 	}
 
 	var networkNames = []string{appName}
@@ -49,7 +50,7 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int, netw
 			Storage:  storage,
 			Ports:    comp.Ports,
 			Networks: formatNetworks,
-			Alias:    origName,
+			Alias:    alias,
 			Env:      env,
 		}
 		err := runtime.CreateContainer(cont)
@@ -61,9 +62,9 @@ func StartComponent(comp *Datatypes.Component, appName string, appCopy int, netw
 }
 
 func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy int, networks []string, replica int) error {
-	origName := comp.Name
-	if comp.Name == "" {
-		comp.Name = comp.Image
+	alias := ""
+	if !strings.Contains(comp.Name, "no-name") {
+		alias = comp.Name
 	}
 
 	var networkNames = []string{appName}
@@ -101,7 +102,7 @@ func StartComponentReplica(comp *Datatypes.Component, appName string, appCopy in
 		Storage:  storage,
 		Ports:    comp.Ports,
 		Networks: formatNetworks,
-		Alias:    origName,
+		Alias:    alias,
 		Env:      env,
 	}
 	err := runtime.CreateContainer(cont)
