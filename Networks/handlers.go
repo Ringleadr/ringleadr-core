@@ -77,3 +77,12 @@ func ListNetworks(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, storage)
 }
+
+func DeleteAllNetworks(ctx *gin.Context) {
+	err := Datastore.DeleteAllNetworks()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting networks: %s", err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, nil)
+}

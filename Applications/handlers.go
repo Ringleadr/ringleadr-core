@@ -200,3 +200,11 @@ func GetApplicationComponentInformation(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, comp)
 }
+
+func DeleteAllApps(ctx *gin.Context) {
+	err := Datastore.DeleteAllApps()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting all apps: %s", err.Error())
+	}
+	ctx.JSON(http.StatusOK, nil)
+}

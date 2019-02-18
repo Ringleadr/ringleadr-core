@@ -14,3 +14,19 @@ func GetOverview(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, overview)
 }
+
+func Purge(ctx *gin.Context) {
+	err := Datastore.DeleteAllApps()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting apps: %s", err.Error())
+	}
+	err = Datastore.DeleteAllNetworks()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting apps: %s", err.Error())
+	}
+	err = Datastore.DeleteAllStorage()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting apps: %s", err.Error())
+	}
+	ctx.JSON(http.StatusOK, nil)
+}

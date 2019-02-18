@@ -304,6 +304,19 @@ func getAppDistribution(apps []Datatypes.Application, nodes []Datatypes.Node) ma
 			delete(results, node.Name)
 		}
 	}
+	//Ignore non valid nodes
+	for k := range results {
+		foundKey := false
+		for _, node := range nodes {
+			if node.Name == k {
+				foundKey = true
+				break
+			}
+		}
+		if !foundKey {
+			delete(results, k)
+		}
+	}
 	return results
 }
 

@@ -82,3 +82,12 @@ func ListStorage(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, storage)
 }
+
+func DeleteAllStorage(ctx *gin.Context) {
+	err := Datastore.DeleteAllStorage()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting storage: %s", err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, nil)
+}

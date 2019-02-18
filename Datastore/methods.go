@@ -53,6 +53,11 @@ func DeleteApp(name string) error {
 	return nil
 }
 
+func DeleteAllApps() error {
+	_, err := applicationCollection.RemoveAll(nil)
+	return err
+}
+
 func InsertStorage(storage *Datatypes.Storage) error {
 	err := storageCollection.Insert(storage)
 	if err != nil {
@@ -90,6 +95,11 @@ func GetStorage(name string) (*Datatypes.Storage, error) {
 	return storage, err
 }
 
+func DeleteAllStorage() error {
+	_, err := storageCollection.RemoveAll(nil)
+	return err
+}
+
 func InsertNetwork(network *Datatypes.Network) error {
 	err := networkCollection.Insert(network)
 	if err != nil {
@@ -125,6 +135,11 @@ func GetNetwork(name string) (*Datatypes.Network, error) {
 		return nil, err
 	}
 	return network, err
+}
+
+func DeleteAllNetworks() error {
+	_, err := networkCollection.RemoveAll(nil)
+	return err
 }
 
 func InsertNode(node *Datatypes.Node) error {
