@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/GodlikePenguin/agogos-host/Applications"
-	"github.com/GodlikePenguin/agogos-host/Components"
 	"github.com/GodlikePenguin/agogos-host/Containers"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/GodlikePenguin/agogos-host/Logger"
@@ -56,7 +55,7 @@ var deleteMethods = map[string]func(ctx *gin.Context){
 	"/all/networks":       Networks.DeleteAllNetworks,
 	"/node/:name":         Nodes.DeleteNode,
 	"/all/node/stats":     Nodes.DeleteAllStats,
-	"/all/comp/stats":     Components.DeleteAllComponentStats,
+	"/all/comp/stats":     Applications.DeleteAllComponentStats,
 	"/everything":         Overview.Purge,
 }
 

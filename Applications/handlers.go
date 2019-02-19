@@ -208,3 +208,13 @@ func DeleteAllApps(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, nil)
 }
+
+//Technically related to Components but easier to place it here to avoid import cycles
+func DeleteAllComponentStats(ctx *gin.Context) {
+	err := Datastore.DeleteCompStats()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, "Error deleting all component stats: %s", err.Error())
+		return
+	}
+	ctx.JSON(http.StatusOK, nil)
+}
