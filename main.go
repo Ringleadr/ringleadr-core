@@ -67,6 +67,7 @@ func main() {
 	background := flag.Bool("background", false, "Whether the host is running as a background process")
 	connectAddress := flag.String("connect", "", "Address of an existing Agogos primary to connect to (optional)")
 	proxy := flag.Bool("proxy", false, "Whether to use the agogos proxy for routing container requests")
+	advertiseAddr := flag.String("addr", "", "Address to use when other nodes connect to this node")
 	flag.Parse()
 
 	Logger.InitLogger(*background)
@@ -82,7 +83,7 @@ func main() {
 	//Use multiple cores for efficiency
 	runtime.GOMAXPROCS(int(math.Min(float64(runtime.NumCPU()), 4)))
 
-	Datastore.SetupDatastore(agogosMode, *connectAddress)
+	Datastore.SetupDatastore(agogosMode, *connectAddress, *advertiseAddr)
 	Containers.StartProxies()
 	r := setupRouter()
 	for path, handler := range getMethods {

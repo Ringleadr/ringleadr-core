@@ -7,6 +7,7 @@ import (
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/GodlikePenguin/agogos-host/Utils"
 	"github.com/globalsign/mgo"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ var (
 	nodeStatsCollection   *mgo.Collection
 )
 
-func SetupDatastore(mode string, primaryAddress string) {
+func SetupDatastore(mode string, primaryAddress string, advertiseaddr string) {
 	//Container runtime should be set up by now, and we know it's running.
 	//Let's create a Datastore container
 	runtime := Containers.GetContainerRuntime()
@@ -61,7 +62,7 @@ func SetupDatastore(mode string, primaryAddress string) {
 	getClient(strings.ToLower(mode), primaryAddress)
 	setupTables()
 	if mode == "Primary" {
-		addThisNode()
+		addThisNode(advertiseaddr)
 	}
 	//startWatchers()
 	startSync(mode, primaryAddress)
@@ -183,12 +184,21 @@ func setupClient(address string) *mgo.Session {
 	return session
 }
 
-func addThisNode() {
+func addThisNode(addr string) {
 	name, err := os.Hostname()
 	if err != nil {
 		panic("Could not get hostname: " + err.Error())
 	}
-	address := Utils.GetOutboundIP()
+
+	var address net.IP
+	if addr == "" {
+		Logger.Println("No advertise address provided, will use the default outbound IP")
+		address = Utils.GetOutboundIP()
+	} else {
+		Logger.Printf("Using %s as advertise address", addr)
+		address = net.ParseIP(addr)
+
+	}
 	node, err := GetNode(name)
 	if err != nil {
 		panic("Could not check node collection on startup")
