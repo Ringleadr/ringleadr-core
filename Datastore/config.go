@@ -208,5 +208,12 @@ func addThisNode(addr string) {
 		if err != nil {
 			panic("Could not set up datastore with this nodes information: " + err.Error())
 		}
+	} else if node.Address != address.String() {
+		Logger.Printf("New advertise address found: %s. Updating records", address.String())
+		node.Address = address.String()
+		err := UpdateNode(node)
+		if err != nil {
+			panic("Could not update existing node definition with new address: " + err.Error())
+		}
 	}
 }

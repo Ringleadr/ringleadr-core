@@ -384,14 +384,17 @@ func displayErrorForAppsOnInactiveNodes(apps []Datatypes.Application, nodes []Da
 					}
 				} else {
 					//Remove inactive message if the node comes back online
-					formatError := fmt.Sprintf("Application is scheduled on inactive node: %s", node.Name)
-					if Utils.StringArrayContains(app.Messages, formatError) {
-						var newMessages []string
-						for _, mesg := range app.Messages {
-							if mesg != formatError {
-								newMessages = append(newMessages, mesg)
-							}
+					err := "Application is scheduled on inactive node"
+					var newMessages []string
+					foundErr := false
+					for _, mesg := range app.Messages {
+						if !strings.Contains(mesg, err) {
+							newMessages = append(newMessages, mesg)
+						} else {
+							foundErr = true
 						}
+					}
+					if foundErr {
 						app.Messages = newMessages
 						shouldSave = true
 					}
