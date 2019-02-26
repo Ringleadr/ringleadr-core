@@ -2,11 +2,13 @@ package Nodes
 
 import (
 	"github.com/GodlikePenguin/agogos-datatypes"
+	"github.com/GodlikePenguin/agogos-host/Applications"
 	"github.com/GodlikePenguin/agogos-host/Datastore"
 	"github.com/GodlikePenguin/agogos-host/Logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func ListNodes(ctx *gin.Context) {
@@ -74,6 +76,17 @@ func DeleteNode(ctx *gin.Context) {
 		//Non critical error so we just log it and carry on
 		Logger.ErrPrintf("Error removing stats for node %s: %s", name, err.Error())
 	}
+
+	if ctx.Query("reschedule") == "true" {
+		go func() {
+			time.Sleep(5 * time.Second)
+			err := Applications.RescheduleAppsOnNode(name)
+			if err != nil {
+				Logger.ErrPrintf("Error rescheduling apps on node %s: %s", name, err.Error())
+			}
+		}()
+	}
+
 	ctx.JSON(http.StatusOK, nil)
 }
 

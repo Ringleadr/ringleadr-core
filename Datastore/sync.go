@@ -78,6 +78,20 @@ func syncTick(runtime Containers.ContainerRuntime, mode string, address string) 
 		distribution := getAppDistribution(apps, nodes)
 		assignAppsWithNoNodes(&apps, distribution)
 		displayErrorForAppsOnInactiveNodes(apps, nodes)
+
+		//Update all the resources for the next methods
+		nodes, err = GetAllNodes()
+		if err != nil {
+			Logger.ErrPrintf("error getting nodes from datastore in sync thread: %s", err.Error())
+			//We don't explicitly deal with the error here as we will come back around again in 10s and retry
+			return
+		}
+		apps, err = GetAllApps()
+		if err != nil {
+			Logger.ErrPrintf("error getting applications from datastore in sync thread: %s", err.Error())
+			//We don't explicitly deal with the error here as we will come back around again in 10s and retry
+			return
+		}
 	}
 
 	createMissingNetworks(networks, runtime)
