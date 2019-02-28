@@ -77,7 +77,7 @@ func DeleteNode(ctx *gin.Context) {
 		Logger.ErrPrintf("Error removing stats for node %s: %s", name, err.Error())
 	}
 
-	if ctx.Query("reschedule") == "true" {
+	if ctx.Query("noreschedule") != "true" {
 		go func() {
 			time.Sleep(5 * time.Second)
 			err := Applications.RescheduleAppsOnNode(name)
