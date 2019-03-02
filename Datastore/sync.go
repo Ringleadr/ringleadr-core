@@ -156,7 +156,16 @@ func createMissingComponents(apps []Datatypes.Application, containers []*Contain
 						desiredReplicas = float64(comp.ScaleMin)
 					}
 					if int(desiredReplicas) != comp.Replicas {
+						oldReplicas := comp.Replicas
 						comp.Replicas = int(desiredReplicas)
+						//If we have less desired than before, manually delete the difference
+						for j := comp.Replicas; j < oldReplicas; j++ {
+							name := "/" + Containers.GetContainerNameForComponent(comp.Name, app.Name, i, j)
+							err := runtime.DeleteContainer(name)
+							if err != nil {
+								Logger.ErrPrintf("Could not remove unneeded replica: %s", err.Error())
+							}
+						}
 						shouldSave = true
 					}
 
