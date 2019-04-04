@@ -14,6 +14,10 @@ var dockerClient *client.Client
 var containerRuntime ContainerRuntime
 var UseProxy bool
 
+// TODO: Rather than storing the dockerClient in this file, store it inside the docker.go file as it is docker specific.
+// TODO: Add a Setup() error method to the container runtime which can create specific implementation details, e.g. the docker client
+// TODO: Be able to pass some information from the main package, to the SetupConfig method, which then passes that config onto the Setup() method for the runtime.
+
 func SetupConfig(contRuntime ContainerRuntime, useProxy bool) {
 	UseProxy = useProxy
 	cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
